@@ -1,4 +1,4 @@
-import tokens
+import token
 
 """
 This is the scanner portion of our microPascal compiler
