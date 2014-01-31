@@ -27,7 +27,11 @@ class Token:
     def getErrorMsg(self,msg):
         lines = self.sourceText.split("\n")
         sourceLine = lines[self.lineIndex]
-        return "\nIn line " + str(self.lineIndex + 1) + " near column " + str(self.colIndex + 1) + ":\n\n" + sourceLine.replace("\t"," ") + "\n" + " "* self.colIndex + "^\n\n" + msg
+        return ("\nIn line " + str(self.lineIndex + 1) 
+            + " near column " + str(self.colIndex + 1) 
+            + ":\n\n" + sourceLine.replace("\t"," ") 
+            + "\n" + " "* self.colIndex 
+            + "^\n\n" + msg)
 
     def getType(self):
         return self.type
