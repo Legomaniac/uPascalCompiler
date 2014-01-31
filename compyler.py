@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import scanner as scanner
-import dispatcher as dispatcher
 from tokens import EOF
 import sys
 
@@ -16,10 +15,13 @@ def main():
     writeln("Here are the tokens returned by the scanner:") 
     writeln("  Line Col  Token") 
   
-    dispatcher.initialize(sourceText) 
+    scanner.initialize(sourceText) 
   
     while True:
-        token = dispatcher.getToken()
+        token = scanner.getToken()
+        if token is None:
+            print "Exception thrown! Quitting now..."
+            break
         writeln(token.show()) 
         if token.type == EOF: break
     
