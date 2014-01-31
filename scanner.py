@@ -45,7 +45,7 @@ def getToken():
         return token
     
     # If this was reached, we know that we found a char that is not in our defined language
-    token.abort("Found a character or symbol that I do not recognize: " + str(fsa.char1))
+    print "Found a character or symbol that I do not recognize: " + token.getErrorMsg(str(fsa.char1))
     return None
     
 

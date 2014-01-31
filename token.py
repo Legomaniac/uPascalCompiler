@@ -1,4 +1,3 @@
-class ScanError(Exception): pass
 
 class Token:
     """
@@ -25,16 +24,10 @@ class Token:
              
     # guts = property(show) #Not sure what this is
 
-    def abort(self,msg):
+    def getErrorMsg(self,msg):
         lines = self.sourceText.split("\n")
         sourceLine = lines[self.lineIndex]
-        raise ScanError("\nIn line " + str(self.lineIndex + 1)
-               + " near column " + str(self.colIndex + 1) + ":\n\n"
-               + sourceLine.replace("\t"," ") + "\n"
-               + " "* self.colIndex
-               + "^\n\n"
-               + msg)
-
+        return "\nIn line " + str(self.lineIndex + 1) + " near column " + str(self.colIndex + 1) + ":\n\n" + sourceLine.replace("\t"," ") + "\n" + " "* self.colIndex + "^\n\n" + msg
 
     def getType(self):
         return self.type
