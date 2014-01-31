@@ -1,12 +1,12 @@
-#This will include an enum of all tokens
-
+#This class makes the Enum concept possible with older version of Python
 class Enum(set):
     def __getattr__(self, name):
         if name in self:
             return name
         raise AttributeError
 
-Tokens = Enum([
+#All the different types of tokens in microPascal
+types = Enum([
     #Reserved Words
     "MP_AND",
     "MP_BEGIN",

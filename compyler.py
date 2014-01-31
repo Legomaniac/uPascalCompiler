@@ -13,7 +13,7 @@ def main():
     fname = sys.argv[1]
     sourceText = open(str(fname)).read()
     writeln("Here are the tokens returned by the scanner:") 
-    writeln("  Line Col  Token") 
+    writeln("Token             Line    Col     Lexeme")
   
     scanner.initialize(sourceText) 
   

@@ -1,0 +1,116 @@
+C:\Python27\python.exe "C:/Dropbox/COURSES/CSCI 468 - Compilers/uPascalCompiler/compyler.py" test1.up
+We have started the compiler
+Here are the tokens returned by the scanner:
+Token             Line    Col     Lexeme
+MP_IDENTIFIER     0       0       AND                                                                   
+MP_AND            0       10      and                                                                   
+MP_IDENTIFIER     0       22      aNd                                                                   
+MP_IDENTIFIER     1       0       BEGIN                                                                 
+MP_BEGIN          1       10      begin                                                                 
+MP_IDENTIFIER     1       22      bEgIn                                                                 
+MP_IDENTIFIER     2       0       DIV                                                                   
+MP_DIV            2       10      div                                                                   
+MP_IDENTIFIER     2       22      dIv                                                                   
+MP_IDENTIFIER     3       0       DO                                                                    
+MP_DO             3       10      do                                                                    
+MP_IDENTIFIER     3       22      Do                                                                    
+MP_IDENTIFIER     4       0       DOWNTO                                                                
+MP_DOWNTO         4       10      downto                                                                
+MP_IDENTIFIER     4       22      DownTo                                                                
+MP_IDENTIFIER     5       0       ELSE                                                                  
+MP_ELSE           5       10      else                                                                  
+MP_IDENTIFIER     5       22      ELSe                                                                  
+MP_IDENTIFIER     6       0       END                                                                   
+MP_END            6       10      end                                                                   
+MP_IDENTIFIER     6       22      ENd                                                                   
+MP_IDENTIFIER     7       0       FOR                                                                   
+MP_FOR            7       10      for                                                                   
+MP_IDENTIFIER     7       22      foR                                                                   
+MP_IDENTIFIER     8       0       FUNCTION                                                              
+MP_FUNCTION       8       10      function                                                              
+MP_IDENTIFIER     8       22      fUnCtIoN                                                              
+MP_IDENTIFIER     9       0       IF                                                                    
+MP_IF             9       10      if                                                                    
+MP_IDENTIFIER     9       22      If                                                                    
+MP_IDENTIFIER     10      0       MOD                                                                   
+MP_MOD            10      10      mod                                                                   
+MP_IDENTIFIER     10      22      mOd                                                                   
+MP_IDENTIFIER     11      0       NOT                                                                   
+MP_NOT            11      10      not                                                                   
+MP_IDENTIFIER     11      22      nOt                                                                   
+MP_IDENTIFIER     12      0       OR                                                                    
+MP_OR             12      10      or                                                                    
+MP_IDENTIFIER     12      22      oR                                                                    
+MP_IDENTIFIER     13      0       PROCEDURE                                                             
+MP_PROCEDURE      13      10      procedure                                                             
+MP_IDENTIFIER     13      22      proceDURE                                                             
+MP_IDENTIFIER     14      0       PROGRAM                                                               
+MP_PROGRAM        14      10      program                                                               
+MP_IDENTIFIER     14      22      PROGram                                                               
+MP_IDENTIFIER     15      0       READ                                                                  
+MP_READ           15      10      read                                                                  
+MP_IDENTIFIER     15      22      rEAD                                                                  
+MP_IDENTIFIER     16      0       REPEAT                                                                
+MP_REPEAT         16      10      repeat                                                                
+MP_IDENTIFIER     16      22      RePeAT                                                                
+MP_IDENTIFIER     17      0       THEN                                                                  
+MP_THEN           17      10      then                                                                  
+MP_IDENTIFIER     17      22      TheN                                                                  
+MP_IDENTIFIER     18      0       TO                                                                    
+MP_TO             18      10      to                                                                    
+MP_IDENTIFIER     18      22      tO                                                                    
+MP_IDENTIFIER     19      0       UNTIL                                                                 
+MP_UNTIL          19      10      until                                                                 
+MP_IDENTIFIER     19      22      untiL                                                                 
+MP_IDENTIFIER     20      0       VAR                                                                   
+MP_VAR            20      10      var                                                                   
+MP_IDENTIFIER     20      22      vAr                                                                   
+MP_IDENTIFIER     21      0       WHILE                                                                 
+MP_WHILE          21      10      while                                                                 
+MP_IDENTIFIER     21      22      whiLE                                                                 
+MP_IDENTIFIER     22      0       WRITE                                                                 
+MP_WRITE          22      10      write                                                                 
+MP_IDENTIFIER     22      22      wRITe                                                                 
+MP_PLUS           24      0       +                                                                     
+MP_COLON          25      0       :                                                                     
+MP_COMMA          26      0       ,                                                                     
+MP_EQUAL          27      0       =                                                                     
+MP_DIV            28      0       /                                                                     
+MP_LTHAN          29      0       <                                                                     
+MP_GTHAN          29      1       >                                                                     
+MP_GTHAN          30      0       >                                                                     
+MP_EQUAL          30      1       =                                                                     
+MP_GTHAN          31      0       >                                                                     
+MP_LTHAN          32      0       <                                                                     
+MP_EQUAL          32      1       =                                                                     
+MP_COLON          33      0       :                                                                     
+MP_EQUAL          33      1       =                                                                     
+MP_LPAREN         34      0       (                                                                     
+MP_RPAREN         35      0       )                                                                     
+MP_LTHAN          36      0       <                                                                     
+MP_MINUS          37      0       -                                                                     
+MP_PERIOD         38      0       .                                                                     
+MP_SCOLON         39      0       ;                                                                     
+MP_TIMES          40      0       *                                                                     
+MP_IDENTIFIER     42      0       a__                                                                   
+MP_IDENTIFIER     43      0       a                                                                     
+MP_IDENTIFIER     44      0       a_b___3                                                               
+MP_IDENTIFIER     45      0       b_____5                                                               
+Traceback (most recent call last):
+  File "C:/Dropbox/COURSES/CSCI 468 - Compilers/uPascalCompiler/compyler.py", line 33, in <module>
+    main()
+  File "C:/Dropbox/COURSES/CSCI 468 - Compilers/uPascalCompiler/compyler.py", line 21, in main
+    token = scanner.getToken()
+  File "C:\Dropbox\COURSES\CSCI 468 - Compilers\uPascalCompiler\scanner.py", line 48, in getToken
+    token.abort("Found a character or symbol that I do not recognize: " + str(fsa.char1))
+  File "C:\Dropbox\COURSES\CSCI 468 - Compilers\uPascalCompiler\token.py", line 36, in abort
+    + msg)
+token.ScanError: 
+In line 47 near column 1:
+
+_x3Z_5
+^
+
+Found a character or symbol that I do not recognize: _
+
+Process finished with exit code 1

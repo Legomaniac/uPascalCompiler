@@ -15,15 +15,12 @@ class Token:
 
     def show(self):
         tokenTypeLen = 0
-        space = " "
-        s = ""
         # Used for printing out the token
-        if self.type == self.lexeme: 
-            s = s + "Symbol" + ":" + space + self.type
-        elif self.type == "Whitespace": 
-            s = s + "Whitespace" + ":" + space + repr(self.lexeme)
-        else:
-            s = s + self.type + ":" + space + self.lexeme
+        a = '{:<18}'.format(self.type)
+        b = '{:<8}'.format(self.lineIndex)
+        c = '{:<8}'.format(self.colIndex)
+        d = '{:<70}'.format(self.lexeme)
+        s = a + b + c + d
         return s
              
     # guts = property(show) #Not sure what this is

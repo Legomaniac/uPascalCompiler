@@ -1,6 +1,7 @@
 ##FSA plugin with all implemented FSA methods
 from token import *
 from tokens import *
+from tokenTypes import *
 import scanner as scanner
 
 class ScanError(Exception): pass
@@ -38,14 +39,14 @@ def process_whitespace():
         getChar()
 
 def identifier_fsa(token):
-    token.type = IDENTIFIER
+    token.type = types.MP_IDENTIFIER
     getChar() 
 
     while char1 in IDENTIFIER_CHARS:
         token.lexeme += char1
         getChar() 
 
-    if token.lexeme in ReservedWords: token.type = token.lexeme
+    if token.lexeme in ReservedWords: token.type = ReservedWords[token.lexeme]
     return token
 
 def integer_fsa(token):
@@ -75,7 +76,7 @@ def string_fsa(token):
     return token
 
 def symbols_fsa(token):
-    token.type = token.lexeme # using type = lexeme for symbols
+    token.type = SingleCharacterSymbols[token.lexeme]
     getChar()
     return token
 
