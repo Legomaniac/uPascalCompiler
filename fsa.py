@@ -28,7 +28,7 @@ def process_whitespace():
         getChar()
 
         while not (char2 == "*/"):
-            if char1 == EOF:
+            if char1 == types.MP_EOF:
                 token.abort("Found end of file before end of comment")
             token.lexeme += char1
             getChar()
@@ -67,7 +67,7 @@ def string_fsa(token):
     getChar() 
 
     while char1 != quoteChar:
-        if char1 == EOF:
+        if char1 == types.MP_EOF:
             token.abort("Found end of file before end of string literal")
 
         token.lexeme += char1
