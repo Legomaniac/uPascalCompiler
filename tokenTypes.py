@@ -62,7 +62,7 @@ types = Enum([
     "MP_MINUS",
     "MP_TIMES",
     "MP_COLON",
-    "MP_DIV_INT",
+    "MP_FLOAT_DIVIDE",
     #End of file
     "MP_EOF",
     #Errors

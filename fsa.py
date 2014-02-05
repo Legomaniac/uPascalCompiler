@@ -10,7 +10,7 @@ class ScanError(Exception): pass
 def process_whitespace():
     while char1 in WHITESPACE_CHARS:
         token = Token(character)
-        token.type = WHITESPACE
+        token.type = types.MP_WHITESPACE
         getChar() 
 
         while char1 in WHITESPACE_CHARS:
@@ -21,7 +21,7 @@ def process_whitespace():
     while char2 == "/*":
         # comment start
         token = Token(character)
-        token.type = COMMENT
+        token.type = types.MP_COMMENT
         token.lexeme = char2
 
         getChar()
@@ -50,7 +50,10 @@ def identifier_fsa(token):
     return token
 
 def integer_fsa(token):
-    token.type = NUMBER
+    token.type = types.MP_INTEGER_LIT
+
+    #  ** Expansion here for numbers **
+
     getChar() 
      
     while char1 in INTEGER:
@@ -72,7 +75,7 @@ def string_fsa(token):
 
     token.lexeme += char1
     getChar()         
-    token.type = STRING
+    token.type = types.MP_STRING_LIT
     return token
 
 def symbols_fsa(token):

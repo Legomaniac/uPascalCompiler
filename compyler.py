@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import scanner as scanner
-from tokens import EOF
+from tokenTypes import types
 import sys
 
 """
@@ -23,7 +23,7 @@ def main():
             print "Exception thrown! Quitting now..."
             break
         writeln(token.show()) 
-        if token.type == EOF: break
+        if token.type == types.MP_EOF: break
     
 def writeln(*args): 
     for arg in args: 

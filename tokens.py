@@ -42,7 +42,7 @@ SingleCharacterSymbols = {
 ":" : types.MP_COLON,
 "," : types.MP_COMMA,
 "=" : types.MP_EQUAL,
-"/" : types.MP_DIV,
+"/" : types.MP_FLOAT_DIVIDE,
 ">=" : types.MP_GEQUAL,
 ">" : types.MP_GTHAN,
 "<=" : types.MP_LEQUAL,
@@ -56,7 +56,21 @@ SingleCharacterSymbols = {
 ";" : types.MP_SCOLON,
 "*" : types.MP_TIMES
 }
- 
+
+"""
+tokenTypes not defined above:
+MP_IDENTIFIER
+MP_INTEGER_LIT
+MP_FIXED_LIT
+MP_FLOAT_LIT
+MP_STRING_LIT
+MP_EOF
+MP_RUN_COMMENT
+MP_RUN_STRING
+MP_ERROR
+"""
+
+#Auxiliary Regular Expressions
 IDENTIFIER_START = string.letters
 IDENTIFIER_CHARS = string.letters + string.digits + "_"
 INTEGER = string.digits
@@ -64,11 +78,3 @@ FIXED = string.digits + "."
 FLOAT = string.digits + "." + "e" + "E" + "+" + "-"
 STRING_STARTCHARS = "'" + '"'
 WHITESPACE_CHARS = " \t\n"
- 
-# TokenTypes for special types and others
-STRING = "String"
-IDENTIFIER = "Identifier"
-NUMBER = "Number"
-WHITESPACE = "Whitespace"
-COMMENT = "Comment"
-EOF = "Eof"
