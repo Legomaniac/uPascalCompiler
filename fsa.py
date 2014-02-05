@@ -81,6 +81,11 @@ def string_fsa(token):
 def symbols_fsa(token):
     token.type = SingleCharacterSymbols[token.lexeme]
     getChar()
+    if char1 in ["=", ">"]:
+        token.lexeme += char1
+        token.type = SingleCharacterSymbols[token.lexeme]
+        getChar()
+
     return token
 
 #------------------------------------
