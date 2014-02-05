@@ -24,7 +24,7 @@ def getToken():
     token = Token(fsa.character)
 
     # If EOF, just return that token
-    if fsa.char1 == EOF:
+    if fsa.char1 == types.MP_EOF:
         token.type = types.MP_EOF
         return token
     # Identifier FSA
