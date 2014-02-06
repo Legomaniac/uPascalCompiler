@@ -78,3 +78,4 @@ FIXED = string.digits + "."
 FLOAT = string.digits + "." + "e" + "E" + "+" + "-"
 STRING_STARTCHARS = "'" + '"'
 WHITESPACE_CHARS = " \t\n"
+EPSILON = ""
