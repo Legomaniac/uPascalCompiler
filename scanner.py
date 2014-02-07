@@ -27,19 +27,23 @@ def getToken():
     if fsa.char1 == "\0":
         token.type = types.MP_EOF
         return token
+
     # Identifier FSA
     if fsa.char1 in IDENTIFIER_START:
         token = fsa.identifier_fsa(token)
         return token
-    # Integer FSA
+
+    # Numbers FSA
     if fsa.char1 in INTEGER:
-        token = fsa.integer_fsa(token)
+        token = fsa.numbers_fsa(token)
         return token
 
+    # String FSA
     if fsa.char1 in STRING_STARTCHARS:
         token = fsa.string_fsa(token)
         return token
- 
+
+    # Symbols FSA
     if fsa.char1 in SingleCharacterSymbols:
         token = fsa.symbols_fsa(token)
         return token
