@@ -1,14 +1,22 @@
 #parser.py
 from tokens import *
-from token import *
+import scanner as scanner
 
 token = None
 
+def dq(s): return '"%s"' %s
+
 def error(msg):
     print msg
+    
+def getToken():
+    global token
+    token = scanner.getToken()
 
-def found(tempToken):
+#Checks to see if the parameter matches what the token actually is
+def match(tempToken):
     if (token == tempToken):
+        getToken()
         return True
     return False
 
@@ -18,6 +26,25 @@ def consume(tempTokenType):
     else:
         error("Expected to find: " + dq(tempTokenType) + ", but found: " + token.show())
         
+def parse(sourceText):
+    global scanner
+    scanner.initialize(sourceText)
+    getToken()
+    start()
+    
+def start():
+    systemgoal() #This is not added yet...
+    while not match(EOF):
+        statement() #This is not added yet...
+    consume(EOF)
+    
+#----- CFG Definitions -------------  
+#-----------------------------------
+#Section from James
+
+
+
+
 
 #-----------------------------------
 def ifstatement():
