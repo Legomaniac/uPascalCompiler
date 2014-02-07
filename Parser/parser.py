@@ -42,9 +42,82 @@ def start():
 #-----------------------------------
 #Section from James
 
+def systemGoal():
+    if found(MP_EOF):
 
+def program():
+    programHeading()
+    consume(MP_SCOLON)
+    block()
+    consume(MP_PERIOD)
 
+def programHeading():
+    consume(MP_PROGRAM)
+    programIdentifier()
 
+def block():
+    variableDeclarationPart()
+    procedureAndFunctionDeclarationPart()
+    statementPart()
+
+def variableDeclarationPart():
+    if found(MP_VAR):
+        variableDeclaration()
+        consume(MP_SCOLON)
+        variableDeclarationTail()
+    # then epsilon
+
+def variableDeclarationTail():
+
+def variableDeclaration():
+
+def type():
+
+def procedureAndFunctionDeclarationPart():
+
+def procedureDeclaration():
+
+def functionDeclaration():
+
+def procedureHeading():
+
+def functionHeading():
+
+def optionalFormalParameterList():
+
+def formalParameterSectionTail():
+
+def formalParameterSection():
+
+def valueParameterSection():
+
+def variableParameterSection():
+
+def statementPart():
+
+def compoundStatement():
+
+def statementSequence():
+
+def statementTail():
+
+def statement():
+
+def emptyStatement():
+
+def readStatement():
+
+def readParameterTail():
+
+def readParameter():
+
+def writeStatement():
+
+def writeParameterTail():
+
+def writeParameter():
+
+def assignmentStatement():
 
 #-----------------------------------
 def ifstatement():
