@@ -49,16 +49,32 @@ def identifier_fsa(token):
     if token.lexeme in ReservedWords: token.type = ReservedWords[token.lexeme]
     return token
 
-def integer_fsa(token):
+def numbers_fsa(token):
     token.type = types.MP_INTEGER_LIT
+    getChar()
 
-    #  ** Expansion here for numbers **
-
-    getChar() 
-     
     while char1 in INTEGER:
         token.lexeme += char1
-        getChar() 
+        getChar()
+
+    if char1 == ".":
+        token.lexeme += char1
+        token.type = types.MP_FIXED_LIT
+        getChar()
+        while char1 in INTEGER:
+            token.lexeme += char1
+            getChar()
+
+    if char1 in ["E", "e"]:
+        token.lexeme += char1
+        getChar()
+        token.lexeme += char1
+        token.type = types.MP_FLOAT_LIT
+        getChar()
+        while char1 in INTEGER:
+            token.lexeme += char1
+            getChar()
+
     return token
 
 def string_fsa(token):
@@ -81,6 +97,11 @@ def string_fsa(token):
 def symbols_fsa(token):
     token.type = SingleCharacterSymbols[token.lexeme]
     getChar()
+    if char1 in ["=", ">"]:
+        token.lexeme += char1
+        token.type = SingleCharacterSymbols[token.lexeme]
+        getChar()
+
     return token
 
 #------------------------------------
