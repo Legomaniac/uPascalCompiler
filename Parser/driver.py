@@ -9,7 +9,6 @@ def main():
     print "Started parse..."
     fname = sys.argv[1]
     sourceText = open(str(fname)).read()
-    
     parser.parse(sourceText)
     
 def writeln(*args): 

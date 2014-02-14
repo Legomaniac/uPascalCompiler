@@ -1,58 +1,82 @@
 #parser.py
 from tokens import *
 import scanner as scanner
+from leaf import Leaf
+
+class ParsingError(Exception): pass
 
 token = None
+indent = 0
 
 def dq(s): return '"%s"' %s
+
+def push(s):
+	global indent
+	indent += 1
+	if verbose: print((" >"*indent) + " " + s)
+
+def pop(s):
+	global indent
+	if verbose: print((" <"*indent) + " " + s)
+	indent -= 1
+
+# --------------------------------------------------------------
+
+ def parse(sourceText):
+	global scanner 
+	# create a Lexer object & pass it the sourceText
+	scanner.initialize(sourceText)
+	getToken()
+	program()
+
+def getToken():
+	global token 
+	token  = scanner.get()
+	print ( ("  " * indent) + " * " + token.show())
+    
+# --------------------------------------------------------------
 
 def error(msg):
     print msg
     
-def getToken():
-    global token
-    token = scanner.getToken()
+def matchOneOf(tempTokenTypes):
+	for tempTokenType in tempTokenTypes:
+		print "matchOneOf", tempTokenType, token.type
+		if token.type == tempTokenType:
+			return True
+	return False
 
-#Checks to see if the parameter matches what the token actually is
-def match(tempToken):
-    if (token == tempToken):
-        getToken()
-        return True
-    return False
+def match(tempTokenType):
+	if token.type == tempTokenType:
+		return True
+	return False
 
-def consume(tempTokenType):
-    if token.type == tempTokenType:
-        getToken()
-    else:
-        error("Expected to find: " + dq(tempTokenType) + ", but found: " + token.show())
-        
-def parse(sourceText):
-    global scanner
-    scanner.initialize(sourceText)
-    getToken()
-    start()
-    
-def start():
-    systemgoal() #This is not added yet...
-    while not match(EOF):
-        statement() #This is not added yet...
-    consume(EOF)
-    
+def expect(*args):
+	for tempTokenType in args:
+		if token.type == tempTokenType:
+			getToken()
+			return True
+	error("Expected to find "
+		+ dq(str(args))
+		+ " but instead match " 
+		+ token.show()
+		)
+
 #----- CFG Definitions -------------  
 #-----------------------------------
 #Section from James
 
 def systemGoal():
-    if found(MP_EOF):
+    if match(MP_EOF):
 
 def program():
     programHeading()
-    consume(MP_SCOLON)
+    expect(MP_SCOLON)
     block()
-    consume(MP_PERIOD)
+    expect(MP_PERIOD)
 
 def programHeading():
-    consume(MP_PROGRAM)
+    expect(MP_PROGRAM)
     programIdentifier()
 
 def block():
@@ -61,11 +85,12 @@ def block():
     statementPart()
 
 def variableDeclarationPart():
-    if found(MP_VAR):
+    if match(MP_VAR):
         variableDeclaration()
-        consume(MP_SCOLON)
+        expect(MP_SCOLON)
         variableDeclarationTail()
-    # then epsilon
+    elif match(EPSILON):
+        pass
 
 def variableDeclarationTail():
 
@@ -120,39 +145,41 @@ def writeParameter():
 def assignmentStatement():
 
 #-----------------------------------
+# Section from Justin
 def ifstatement():
-    """ ifstatement -> ["if" BooleanExpression "then" Statement OptionalElsePart] """
-    if found(MP_IF):
+    """ ifstatement -> "if" BooleanExpression "then" Statement OptionalElsePart """
+    if match(MP_IF):
         booleanexpression()
-        consume(MP_THEN)
+        expect(MP_THEN)
         statement()
         optionalelsepart()
         
 def optionalelsepart():
-    if found(MP_ELSE):
+    if match(MP_ELSE):
         statement()
-    # then epsilon
+    elif match(EPSILON):
+        pass
     
 def repeatstatement():
-    if found(MP_REPEAT):
+    if match(MP_REPEAT):
         statementsequence()
-        consume(MP_UNTIL)
+        expect(MP_UNTIL)
         booleanexpression()
         
 def whilestatement():
-    if found(MP_WHILE):
+    if match(MP_WHILE):
         booleanexpression()
-        consume(MP_DO)
+        expect(MP_DO)
         statement()
         
 def forstatement():
-    if found(MP_FOR):
+    if match(MP_FOR):
         controlvariable()
-        consume(MP_ASSIGN)
+        expect(MP_ASSIGN)
         initialvalue()
         stepvalue()
         finalvalue()
-        consume(MP_DO)
+        expect(MP_DO)
         statement()
         
 def controlvariable():
@@ -162,10 +189,10 @@ def initialvalue():
     ordinalexpression()
     
 def stepvalue():
-    if found(MP_TO):
-        #not sure what else would happen after it is matched
-    elif found(MP_DOWNTO):
-        # "" "" 
+    if match(MP_TO):
+        pass
+    elif match(MP_DOWNTO):
+        pass
         
 def finalvalue():
     ordinalexpression()
@@ -175,15 +202,15 @@ def procedurestatement():
     optionalactualparameterlist()
     
 def optionalactualparameterlist():
-    if found(MP_LPAREN):
+    if match(MP_LPAREN):
         actualparameter()
         actualparametertail()
-        consume(MP_RPAREN)
-    elif found(EPSILON):
-        #something
+        expect(MP_RPAREN)
+    elif match(EPSILON):
+        pass
         
 def actualparametertail():
-    if found(MP_COMMA):
+    if match(MP_COMMA):
         actualparameter()
         actualparametertail()
 
@@ -197,15 +224,16 @@ def expression():
 def optionalrelationalpart():
     relationaloperator()
     simpleexpression()
-    #epsilon
+    if match(EPSILON):
+        pass
     
 def relationaloperator():
-    if found(MP_EQUAL):
-    elif found(MP_LTHAN):
-    elif found(MP_GTHAN):
-    elif found(MP_LEQUAL):
-    elif found(MP_GEQUAL):
-    elif found(MP_NEQUAL):
+    if match(MP_EQUAL):
+    elif match(MP_LTHAN):
+    elif match(MP_GTHAN):
+    elif match(MP_LEQUAL):
+    elif match(MP_GEQUAL):
+    elif match(MP_NEQUAL):
         
 def simpleexpression():
     optionalsign()
@@ -216,16 +244,17 @@ def termtail():
     addingoperator()
     term()
     termtail()
-    #epsilon
+    if match(EPSILON):
+        pass
     
 def optionalsign():
-    if found(MP_PLUS):
-    elif found(MP_MINUS):
+    if match(MP_PLUS):
+    elif match(MP_MINUS):
     
 def addingoperator():
-    if found(MP_PLUS):
-    elif found(MP_MINUS):
-    elif found(MP_OR):
+    if match(MP_PLUS):
+    elif match(MP_MINUS):
+    elif match(MP_OR):
         
 def term():
     factor()
@@ -237,37 +266,37 @@ def factortail():
     factortail()
     
 def multiplyingoperator():
-    if found(MP_TIMES):
-    elif found(MP_FLOAT_DIVIDE):
-    elif found(MP_DIV):
-    elif found(MP_MOD):
-    elif found(MP_AND):
+    if match(MP_TIMES):
+    elif match(MP_FLOAT_DIVIDE):
+    elif match(MP_DIV):
+    elif match(MP_MOD):
+    elif match(MP_AND):
         
 def factor():
     unsignedinteger()
     unsignedfloat()
     stringliteral()
-    if found(MP_TRUE):
-    elif found(MP_FALSE):
-    elif found(MP_NOT):
+    if match(MP_TRUE):
+    elif match(MP_FALSE):
+    elif match(MP_NOT):
         factor
-    elif found(MP_LPAREN):
+    elif match(MP_LPAREN):
         expression
-        consume(MP_RPAREN)
+        expect(MP_RPAREN)
     functionidentifier()
     optionalactualparameterlist()
     
 def programidentifier():
-    consume(IDENTIFIER_CHARS)
+    expect(IDENTIFIER_CHARS)
     
 def variableidentifier():
-    consume(IDENTIFIER_CHARS)
+    expect(IDENTIFIER_CHARS)
     
 def procedureidentifier():
-    consume(IDENTIFIER_CHARS)
+    expect(IDENTIFIER_CHARS)
     
 def functionidentifier():
-    consume(IDENTIFIER_CHARS)
+    expect(IDENTIFIER_CHARS)
     
 def booleanexpression():
     expression()
@@ -276,22 +305,12 @@ def ordinalexpression():
     expression()
     
 def identifierlist():
-    consume(IDENTIFIER_CHARS)
+    expect(IDENTIFIER_CHARS)
     identifiertail()
     
 def identifiertail():
-    if found(MP_COMMA):
-        consume(IDENTIFIER_CHARS)
+    if match(MP_COMMA):
+        expect(IDENTIFIER_CHARS)
         identifiertail()
-    elif found(ESPILON):
-        #something
-        
-
-        
-        
-
-
-
-
-
-        
+    elif match(EPSILON):
+        pass
