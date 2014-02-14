@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import scanner as scanner
-from tokenTypes import types
+import parser as parser
 import sys
 
 """
@@ -9,21 +8,11 @@ This is the main driver for the program
 """
 
 def main():
-    print "We have started the compiler"
+    print "We have started the Parser."
     fname = sys.argv[1]
     sourceText = open(str(fname)).read()
-    writeln("Here are the tokens returned by the scanner:") 
     writeln("Token             Line    Col     Lexeme")
-  
-    scanner.initialize(sourceText) 
-  
-    while True:
-        token = scanner.getToken()
-        if token is None:
-            print "Exception thrown! Quitting now..."
-            break
-        writeln(token.show()) 
-        if token.type == types.MP_EOF: break
+    parser.parse(sourceText)
     
 def writeln(*args): 
     for arg in args: 
@@ -31,4 +20,4 @@ def writeln(*args):
 
 if __name__ == "__main__":
     main()
-    print "Completed run of Compiler."
+    print "Completed Parse!"

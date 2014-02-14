@@ -1,7 +1,9 @@
 #parser.py
+import sys
+from leaf import Leaf
+sys.path.insert(0, '../')
 from tokens import *
 import scanner as scanner
-from leaf import Leaf
 
 class ParsingError(Exception): pass
 
@@ -22,16 +24,16 @@ def pop(s):
 
 # --------------------------------------------------------------
 
- def parse(sourceText):
-	global scanner 
+def parse(sourceText):
+    global scanner 
 	# create a Lexer object & pass it the sourceText
-	scanner.initialize(sourceText)
-	getToken()
-	program()
+    scanner.initialize(sourceText)
+    getToken()
+    program()
 
 def getToken():
 	global token 
-	token  = scanner.get()
+	token  = scanner.getToken()
 	print ( ("  " * indent) + " * " + token.show())
     
 # --------------------------------------------------------------
@@ -67,16 +69,17 @@ def expect(*args):
 #Section from James
 
 def systemGoal():
-    if match(MP_EOF):
+    if match(types.MP_EOF):
+        pass
 
 def program():
     programHeading()
-    expect(MP_SCOLON)
+    expect(types.MP_SCOLON)
     block()
-    expect(MP_PERIOD)
+    expect(types.MP_PERIOD)
 
 def programHeading():
-    expect(MP_PROGRAM)
+    expect(types.MP_PROGRAM)
     programIdentifier()
 
 def block():
@@ -85,101 +88,127 @@ def block():
     statementPart()
 
 def variableDeclarationPart():
-    if match(MP_VAR):
+    if match(types.MP_VAR):
         variableDeclaration()
-        expect(MP_SCOLON)
+        expect(types.MP_SCOLON)
         variableDeclarationTail()
-    elif match(EPSILON):
+    elif match(types.EPSILON):
         pass
 
 def variableDeclarationTail():
+    pass
 
 def variableDeclaration():
-
-def type():
+    pass
+    
+def Type():
+    pass
 
 def procedureAndFunctionDeclarationPart():
+    pass
 
 def procedureDeclaration():
+    pass
 
 def functionDeclaration():
+    pass
 
 def procedureHeading():
+    pass
 
 def functionHeading():
+    pass
 
 def optionalFormalParameterList():
+    pass
 
 def formalParameterSectionTail():
+    pass
 
 def formalParameterSection():
+    pass
 
 def valueParameterSection():
+    pass
 
 def variableParameterSection():
+    pass
 
 def statementPart():
+    pass
 
 def compoundStatement():
+    pass
 
 def statementSequence():
+    pass
 
 def statementTail():
+    pass
 
 def statement():
+    pass
 
 def emptyStatement():
+    pass
 
 def readStatement():
+    pass
 
 def readParameterTail():
+    pass
 
 def readParameter():
+    pass
 
 def writeStatement():
+    pass
 
 def writeParameterTail():
+    pass
 
 def writeParameter():
+    pass
 
 def assignmentStatement():
+    pass
 
 #-----------------------------------
 # Section from Justin
 def ifstatement():
     """ ifstatement -> "if" BooleanExpression "then" Statement OptionalElsePart """
-    if match(MP_IF):
+    if match(types.MP_IF):
         booleanexpression()
-        expect(MP_THEN)
+        expect(types.MP_THEN)
         statement()
         optionalelsepart()
         
 def optionalelsepart():
-    if match(MP_ELSE):
+    if match(types.MP_ELSE):
         statement()
-    elif match(EPSILON):
+    elif match(types.EPSILON):
         pass
     
 def repeatstatement():
-    if match(MP_REPEAT):
+    if match(types.MP_REPEAT):
         statementsequence()
-        expect(MP_UNTIL)
+        expect(types.MP_UNTIL)
         booleanexpression()
         
 def whilestatement():
-    if match(MP_WHILE):
+    if match(types.MP_WHILE):
         booleanexpression()
-        expect(MP_DO)
+        expect(types.MP_DO)
         statement()
         
 def forstatement():
-    if match(MP_FOR):
+    if match(types.MP_FOR):
         controlvariable()
-        expect(MP_ASSIGN)
+        expect(types.MP_ASSIGN)
         initialvalue()
         stepvalue()
         finalvalue()
-        expect(MP_DO)
+        expect(types.MP_DO)
         statement()
         
 def controlvariable():
@@ -189,9 +218,9 @@ def initialvalue():
     ordinalexpression()
     
 def stepvalue():
-    if match(MP_TO):
+    if match(types.MP_TO):
         pass
-    elif match(MP_DOWNTO):
+    elif match(types.MP_DOWNTO):
         pass
         
 def finalvalue():
@@ -202,15 +231,15 @@ def procedurestatement():
     optionalactualparameterlist()
     
 def optionalactualparameterlist():
-    if match(MP_LPAREN):
+    if match(types.MP_LPAREN):
         actualparameter()
         actualparametertail()
-        expect(MP_RPAREN)
-    elif match(EPSILON):
+        expect(types.MP_RPAREN)
+    elif match(types.EPSILON):
         pass
         
 def actualparametertail():
-    if match(MP_COMMA):
+    if match(types.MP_COMMA):
         actualparameter()
         actualparametertail()
 
@@ -224,16 +253,22 @@ def expression():
 def optionalrelationalpart():
     relationaloperator()
     simpleexpression()
-    if match(EPSILON):
+    if match(types.EPSILON):
         pass
     
 def relationaloperator():
-    if match(MP_EQUAL):
-    elif match(MP_LTHAN):
-    elif match(MP_GTHAN):
-    elif match(MP_LEQUAL):
-    elif match(MP_GEQUAL):
-    elif match(MP_NEQUAL):
+    if match(types.MP_EQUAL):
+        pass
+    elif match(types.MP_LTHAN):
+        pass
+    elif match(types.MP_GTHAN):
+        pass
+    elif match(types.MP_LEQUAL):
+        pass
+    elif match(types.MP_GEQUAL):
+        pass
+    elif match(types.MP_NEQUAL):
+        pass
         
 def simpleexpression():
     optionalsign()
@@ -244,17 +279,22 @@ def termtail():
     addingoperator()
     term()
     termtail()
-    if match(EPSILON):
+    if match(types.EPSILON):
         pass
     
 def optionalsign():
-    if match(MP_PLUS):
-    elif match(MP_MINUS):
+    if match(types.MP_PLUS):
+        pass
+    elif match(types.MP_MINUS):
+        pass
     
 def addingoperator():
-    if match(MP_PLUS):
-    elif match(MP_MINUS):
-    elif match(MP_OR):
+    if match(types.MP_PLUS):
+        pass
+    elif match(types.MP_MINUS):
+        pass
+    elif match(types.MP_OR):
+        pass
         
 def term():
     factor()
@@ -266,37 +306,44 @@ def factortail():
     factortail()
     
 def multiplyingoperator():
-    if match(MP_TIMES):
-    elif match(MP_FLOAT_DIVIDE):
-    elif match(MP_DIV):
-    elif match(MP_MOD):
-    elif match(MP_AND):
+    if match(types.MP_TIMES):
+        pass
+    elif match(types.MP_FLOAT_DIVIDE):
+        pass
+    elif match(types.MP_DIV):
+        pass
+    elif match(types.MP_MOD):
+        pass
+    elif match(types.MP_AND):
+        pass
         
 def factor():
     unsignedinteger()
     unsignedfloat()
     stringliteral()
-    if match(MP_TRUE):
-    elif match(MP_FALSE):
-    elif match(MP_NOT):
-        factor
-    elif match(MP_LPAREN):
-        expression
-        expect(MP_RPAREN)
+    if match(types.MP_TRUE):
+        pass
+    elif match(types.MP_FALSE):
+        pass
+    elif match(types.MP_NOT):
+        factor()
+    elif match(types.MP_LPAREN):
+        expression()
+        expect(types.MP_RPAREN)
     functionidentifier()
     optionalactualparameterlist()
     
 def programidentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.IDENTIFIER_CHARS)
     
 def variableidentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.IDENTIFIER_CHARS)
     
 def procedureidentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.IDENTIFIER_CHARS)
     
 def functionidentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.IDENTIFIER_CHARS)
     
 def booleanexpression():
     expression()
@@ -305,12 +352,12 @@ def ordinalexpression():
     expression()
     
 def identifierlist():
-    expect(IDENTIFIER_CHARS)
+    expect(types.IDENTIFIER_CHARS)
     identifiertail()
     
 def identifiertail():
-    if match(MP_COMMA):
-        expect(IDENTIFIER_CHARS)
+    if match(types.MP_COMMA):
+        expect(types.IDENTIFIER_CHARS)
         identifiertail()
-    elif match(EPSILON):
+    elif match(types.EPSILON):
         pass
