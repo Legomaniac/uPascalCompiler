@@ -6,7 +6,6 @@ from tokens import *
 import scanner as scanner
 
 class ParsingError(Exception): pass
-
 token = None
 indent = 0
 
@@ -24,26 +23,19 @@ def pop(s):
 
 # --------------------------------------------------------------
 
-<<<<<<< HEAD
 def parse(sourceText):
     global scanner 
-=======
+
  def parse(sourceText):
 	global scanner
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 	# create a Lexer object & pass it the sourceText
     scanner.initialize(sourceText)
     getToken()
     program()
 
 def getToken():
-<<<<<<< HEAD
 	global token 
 	token  = scanner.getToken()
-=======
-	global token
-	token  = scanner.get()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 	print ( ("  " * indent) + " * " + token.show())
 
 # --------------------------------------------------------------
@@ -84,7 +76,6 @@ Rule 1:
 SystemGoal -> Program EOF
 """
 def systemGoal():
-<<<<<<< HEAD
     if match(types.MP_EOF):
         pass
 
@@ -95,18 +86,15 @@ def systemGoal():
 Rule 2:
 Program -> ProgramHeading ";" Block "."
 """
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 def program():
     programHeading()
     expect(types.MP_SCOLON)
     block()
-<<<<<<< HEAD
     expect(types.MP_PERIOD)
 
 def programHeading():
     expect(types.MP_PROGRAM)
     programIdentifier()
-=======
     expect(MP_PERIOD)
 """
 Rule 3:
@@ -115,7 +103,6 @@ ProgramHeading -> "program" ProgramIdentifier
 def programHeading():
     if match(MP_PROGRAM):
          programIdentifier()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 
 """
 Rule 4:
@@ -144,33 +131,19 @@ VariableDeclarationTail -> VariableDeclaration ";" VariableDeclarationTail
                         -> epsilon
 """
 def variableDeclarationTail():
-<<<<<<< HEAD
-    pass
-=======
     variableDeclaration()
     expect("MP_SCOLON")
     variableDeclarationTail()
     if match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 9:
 VariableDeclaration -> IdentifierList ":" Type
 """
 def variableDeclaration():
-<<<<<<< HEAD
-    pass
-    
-def Type():
-    pass
-
-def procedureAndFunctionDeclarationPart():
-    pass
-=======
     identifierList()
     expect(MP_COLON)
-    type()
+    Type()
 """
 Rule 10, 11, 12 and 13:
 Type -> "Integer"
@@ -178,7 +151,7 @@ Type -> "Integer"
      -> "String"
      -> "Boolean"
 """
-def type():
+def Type():
     if match(MP_INTEGER_LIT):
     elif match(MP_FLOAT_LIT):
     elif match(MP_STRING_LIT):
@@ -196,50 +169,29 @@ def procedureAndFunctionDeclarationPart():
     procedureAndFunctionDeclarationPart()
     if match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 17:
 ProcedureDeclaration -> ProcedureHeading ";" Block ";"
 """
 def procedureDeclaration():
-<<<<<<< HEAD
-    pass
-=======
     procedureHeading()
     expect(MP_SCOLON)
     block()
     expect(MP_SCOLON)
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 18:
 FunctionDeclaration -> FunctionHeading ";" Block ";"
 """
 def functionDeclaration():
-<<<<<<< HEAD
-    pass
-=======
     functionHeading()
     expect(MP_SCOLON)
     block()
     expect(MP_SCOLON)
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 19:
 ProcedureHeading -> "procedure" procedureIdentifier OptionalFormalParameterList
 """
 def procedureHeading():
-<<<<<<< HEAD
-    pass
-
-def functionHeading():
-    pass
-
-def optionalFormalParameterList():
-    pass
-=======
     if match(MP_PROCEDURE):
         procedureIdentifier()
         optionalFormalParameterList()
@@ -265,54 +217,33 @@ def optionalFormalParameterList():
         expect(MP_RPAREN)
     elif match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 23 and 24:
 FormalParameterSectionTail -> ";" FormalParameterSection FormalParameterSectionTail
                            -> epsilon
 """
 def formalParameterSectionTail():
-<<<<<<< HEAD
-    pass
-=======
     if match(MP_SCOLON):
         formalParameterSection()
         formalParameterSectionTail()
     elif match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 25 and 26:
 FormalParameterSection -> ValueParameterSection
                        -> VariableParameterSection
 """
 def formalParameterSection():
-<<<<<<< HEAD
-    pass
-=======
     valueParameterSection()
     variableParameterSection()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 27:
 ValueParameterSection -> IdentifierList ":" Type
 """
 def valueParameterSection():
-<<<<<<< HEAD
-    pass
-
-def variableParameterSection():
-    pass
-
-def statementPart():
-    pass
-=======
     identifierList()
     expect(MP_COLON)
-    type()
+    Type()
 
 """
 Rule 28:
@@ -322,34 +253,21 @@ def variableParameterSection():
     if match(MP_VAR):
         identifierList()
         expect(MP_COLON)
-        type()
-
+        Type()
 """
 Rule 29:
 StatementPart -> CompoundStatement
 """
 def statementPart():
     compoundStatement()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 30:
 CompoundStatement -> "begin" StatementSequence "end"
 """
 def compoundStatement():
-<<<<<<< HEAD
-    pass
-
-def statementSequence():
-    pass
-
-def statementTail():
-    pass
-=======
     if match(MP_BEGIN):
         statementSequence()
         expect(MP_END)
-
 """
 Rule 31:
 StatementSequence -> Statement StatementTail
@@ -369,8 +287,6 @@ def statementTail():
         statementTail()
     elif match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 34, 35, 36, 37, 38, 39, 40, 41, 42, and 43:
 Statement -> EmptyStatement
@@ -385,10 +301,6 @@ Statement -> EmptyStatement
           -> ProcedureStatement
 """
 def statement():
-<<<<<<< HEAD
-    pass
-
-=======
     emptyStatement()
     compoundStatement()
     readStatement()
@@ -403,7 +315,6 @@ def statement():
 Rule 44:
 EmptyStatement -> epsilon
 """
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 def emptyStatement():
     pass
 
@@ -412,52 +323,34 @@ Rule 45:
 ReadStatement -> "read" "(" ReadParameter ReadParameterTail ")"
 """
 def readStatement():
-<<<<<<< HEAD
-    pass
-=======
     if match(MP_READ):
         expect(MP_LPAREN)
         readParameter()
         readParameterTail()
         expect(MP_RPAREN)
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 46 and 47:
 ReadParameterTail -> "," ReadParameter ReadParameterTail
                   -> epsilon
 """
 def readParameterTail():
-<<<<<<< HEAD
-    pass
-=======
     if match(MP_COMMA):
         readParameter()
         readParameterTail()
     elif match(EPSILON):
         pass
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 48:
 ReadParameter -> VariableIdentifier
 """
 def readParameter():
-<<<<<<< HEAD
-    pass
-=======
     variableIdentifier()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 49 and 50:
 WriteStatement -> "write"  "(" WriteParameter WriteParameterTail ")"
                -> "writeln" "(" WriteParameter WriteParameterTail ")"
 """
 def writeStatement():
-<<<<<<< HEAD
-    pass
-=======
     if match(MP_WRITE):
         expect(MP_LPAREN)
         writeParameter()
@@ -468,20 +361,12 @@ def writeStatement():
         writeParameter()
         writeParameterTail()
         expect(MP_RPAREN)
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 51 and 52:
 WriteParameterTail -> "," WriteParameter WriteParameterTail
                    -> epsilon
 """
 def writeParameterTail():
-<<<<<<< HEAD
-    pass
-
-def writeParameter():
-    pass
-=======
     if match(MP_COMMA):
         writeParameter()
         writeParameterTail()
@@ -493,30 +378,12 @@ WriteParameter -> OrdinalExpression
 """
 def writeParameter():
     ordinalExpression()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
-
 """
 Rule 54 and 55:
 AssignmentStatement -> VariableIdentifier ":=" Expression
                     -> FunctionIdentifier ":=" Expression
 """
 def assignmentStatement():
-<<<<<<< HEAD
-    pass
-
-#-----------------------------------
-# Section from Justin
-def ifstatement():
-    """ ifstatement -> "if" BooleanExpression "then" Statement OptionalElsePart """
-    if match(types.MP_IF):
-        booleanexpression()
-        expect(types.MP_THEN)
-        statement()
-        optionalelsepart()
-        
-def optionalelsepart():
-    if match(types.MP_ELSE):
-=======
     variableIdentifier()
     expect(MP_ASSIGN)
     expression()
@@ -545,43 +412,9 @@ OptionalElsePart -> "else" Statement
 """
 def optionalElsePart():
     if match(MP_ELSE):
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
         statement()
     elif match(types.EPSILON):
         pass
-<<<<<<< HEAD
-    
-def repeatstatement():
-    if match(types.MP_REPEAT):
-        statementsequence()
-        expect(types.MP_UNTIL)
-        booleanexpression()
-        
-def whilestatement():
-    if match(types.MP_WHILE):
-        booleanexpression()
-        expect(types.MP_DO)
-        statement()
-        
-def forstatement():
-    if match(types.MP_FOR):
-        controlvariable()
-        expect(types.MP_ASSIGN)
-        initialvalue()
-        stepvalue()
-        finalvalue()
-        expect(types.MP_DO)
-        statement()
-        
-def controlvariable():
-    variableidentifier()
-    
-def initialvalue():
-    ordinalexpression()
-    
-def stepvalue():
-    if match(types.MP_TO):
-=======
 """
 Rule 59:
 RepeatStatement -> "repeat" StatementSequence "until" BooleanExpression
@@ -636,63 +469,9 @@ StepValue -> "to"
 """
 def stepValue():
     if match(MP_TO):
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
         pass
     elif match(types.MP_DOWNTO):
         pass
-<<<<<<< HEAD
-        
-def finalvalue():
-    ordinalexpression()
-    
-def procedurestatement():
-    procedureidentifier()
-    optionalactualparameterlist()
-    
-def optionalactualparameterlist():
-    if match(types.MP_LPAREN):
-        actualparameter()
-        actualparametertail()
-        expect(types.MP_RPAREN)
-    elif match(types.EPSILON):
-        pass
-        
-def actualparametertail():
-    if match(types.MP_COMMA):
-        actualparameter()
-        actualparametertail()
-
-def actualparameter():
-    ordinalexpression()
-    
-def expression():
-    simpleexpression()
-    optionalrelationalpart()
-    
-def optionalrelationalpart():
-    relationaloperator()
-    simpleexpression()
-    if match(types.EPSILON):
-        pass
-    
-def relationaloperator():
-    if match(types.MP_EQUAL):
-        pass
-    elif match(types.MP_LTHAN):
-        pass
-    elif match(types.MP_GTHAN):
-        pass
-    elif match(types.MP_LEQUAL):
-        pass
-    elif match(types.MP_GEQUAL):
-        pass
-    elif match(types.MP_NEQUAL):
-        pass
-        
-def simpleexpression():
-    optionalsign()
-=======
-
 """
 Rule 66:
 FinalValue -> OrdinalExpression
@@ -777,7 +556,6 @@ SimpleExpression -> OptionalSign Term TermTail
 """
 def simpleExpression():
     optionalSign()
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
     term()
     termTail()
 
@@ -789,26 +567,6 @@ TermTail -> AddingOperator Term TermTail
 def termTail():
     addingOperator()
     term()
-<<<<<<< HEAD
-    termtail()
-    if match(types.EPSILON):
-        pass
-    
-def optionalsign():
-    if match(types.MP_PLUS):
-        pass
-    elif match(types.MP_MINUS):
-        pass
-    
-def addingoperator():
-    if match(types.MP_PLUS):
-        pass
-    elif match(types.MP_MINUS):
-        pass
-    elif match(types.MP_OR):
-        pass
-        
-=======
     termTail()
     if match(EPSILON):
         pass
@@ -838,11 +596,9 @@ def addingOperator():
 Rule 91:
 Term -> Factor FactorTail
 """
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
 def term():
     factor()
     factorTail()
-
 """
 Rule 92 and 93:
 FactorTail -> MultiplyingOperator Factor FactorTail
@@ -852,51 +608,6 @@ def factorTail():
     multiplyingOperator()
     factor()
     factortail()
-<<<<<<< HEAD
-    
-def multiplyingoperator():
-    if match(types.MP_TIMES):
-        pass
-    elif match(types.MP_FLOAT_DIVIDE):
-        pass
-    elif match(types.MP_DIV):
-        pass
-    elif match(types.MP_MOD):
-        pass
-    elif match(types.MP_AND):
-        pass
-        
-def factor():
-    unsignedinteger()
-    unsignedfloat()
-    stringliteral()
-    if match(types.MP_TRUE):
-        pass
-    elif match(types.MP_FALSE):
-        pass
-    elif match(types.MP_NOT):
-        factor()
-    elif match(types.MP_LPAREN):
-        expression()
-        expect(types.MP_RPAREN)
-    functionidentifier()
-    optionalactualparameterlist()
-    
-def programidentifier():
-    expect(types.IDENTIFIER_CHARS)
-    
-def variableidentifier():
-    expect(types.IDENTIFIER_CHARS)
-    
-def procedureidentifier():
-    expect(types.IDENTIFIER_CHARS)
-    
-def functionidentifier():
-    expect(types.IDENTIFIER_CHARS)
-    
-def booleanexpression():
-=======
-
 """
 Rule 94, 95, 96, 97 and 98:
 MultiplyingOperator -> "*"
@@ -911,7 +622,6 @@ def multiplyingOperator():
     elif match(MP_DIV):
     elif match(MP_MOD):
     elif match(MP_AND):
-
 """
 Rule 99, 100, 101, 102, 103, 104, 105 and 106:
 Factor -> UnsignedInteger
@@ -936,61 +646,42 @@ def factor():
         expect(MP_RPAREN)
     functionIdentifier()
     optionalactualparameterlist()
-
 """
 Rule 107:
 ProgramIdentifier -> Identifier
 """
 def programIdentifier():
     expect(IDENTIFIER_CHARS)
-
 """
 Rule 108:
 VariableIdentifier -> Identifier
 """
 def variableIdentifier():
     expect(IDENTIFIER_CHARS)
-
 """
 Rule 109:
 ProcedureIdentifier -> Identifier
 """
 def procedureIdentifier():
     expect(IDENTIFIER_CHARS)
-
 """
 Rule 110:
 FunctionIdentifier -> Identifier
 """
 def functionIdentifier():
     expect(IDENTIFIER_CHARS)
-
 """
 Rule 111:
 BooleanExpression -> Expression
 """
 def booleanExpression():
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
     expression()
-
 """
 Rule 112:
 OrdinalExpression -> Expression
 """
 def ordinalExpression():
     expression()
-<<<<<<< HEAD
-    
-def identifierlist():
-    expect(types.IDENTIFIER_CHARS)
-    identifiertail()
-    
-def identifiertail():
-    if match(types.MP_COMMA):
-        expect(types.IDENTIFIER_CHARS)
-        identifiertail()
-    elif match(types.EPSILON):
-=======
 
 """
 Rule 113:
@@ -1010,5 +701,4 @@ def identifierTail():
         expect(IDENTIFIER_CHARS)
         identifierTail()
     elif match(EPSILON):
->>>>>>> 5cb4f159e5068305fa319777ad5dcd72b151a31a
         pass
