@@ -1,0 +1,36 @@
+program Beacon;
+ 
+uses
+  A2D;
+ 
+var
+  I_IR_Receiver : boolean @PORTB.4;
+  O_LED_RECEIVING : boolean @PORTC.0;
+  O_LED_ERROR : boolean @PORTC.1;
+  O_PWM_A : boolean @PORTC.4;
+  O_PWM_B : boolean @PORTC.5;
+  I_ADDR_0 : boolean @PORTA.2;
+  I_ADDR_1 : boolean @PORTA.5;
+ 
+CONST
+  LOW_BATT_SENSOR_CHANNEL = ANS0;
+ 
+  cLED_ON = TRUE;
+  cLED_OFF = FALSE;
+ 
+  TRISA_MASK = [I_NOT_OPTION_SERIAL, I_ADDR_0, I_ADDR_1];
+  TRISB_MASK = [I_IR_Receiver];
+  TRISC_MASK = [];
+begin
+  ...
+  PORTA := 0;
+  TRISA := TRISA_MASK;
+  ... 
+  A2D_Init([LOW_BATT_SENSOR_CHANNEL], 5, adcFosc16, adm8Bits, advVdd);
+ 
+  Baud(19200);
+  assign(output, SerialPort_Output);
+ 
+  writeln('Hello world!');
+  ...
+end.

@@ -1,4 +1,3 @@
-
 class Token:
     """
     A Token object contains {type, lexeme, line#, col#}
@@ -22,8 +21,6 @@ class Token:
         s = a + b + c + d
         return s
              
-    # guts = property(show) #Not sure what this is
-
     def getErrorMsg(self,msg):
         lines = self.sourceText.split("\n")
         sourceLine = lines[self.lineIndex]

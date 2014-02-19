@@ -15,7 +15,7 @@ def parse(sourceText):
     global scanner
     scanner.initialize(sourceText)
     getToken()
-    program()
+    systemGoal()
 
 def getToken():
 	global token 
@@ -25,7 +25,7 @@ def getToken():
 # --------------------------------------------------------------
 
 def error(msg):
-    print msg
+    sys.exit("Parse Error " + token.getErrorMsg(msg))
 
 def matchOneOf(tempTokenTypes):
 	for tempTokenType in tempTokenTypes:
@@ -36,7 +36,8 @@ def matchOneOf(tempTokenTypes):
 
 def match(tempTokenType):
     if token.type == tempTokenType:
-		return True
+        getToken()
+        return True
     else:
         return False
 
@@ -47,7 +48,7 @@ def expect(*args):
 			return True
 	error("Expected to find "
 		+ dq(str(args))
-		+ " but instead match "
+		+ " but instead found: "
 		+ token.show()
 		)
 
@@ -69,12 +70,12 @@ Program -> ProgramHeading ";" Block "."
 """
 def program():
     programHeading()
-    expect(types.types.MP_SCOLON)
+    expect(types.MP_SCOLON)
     block()
-    expect(types.types.MP_PERIOD)
+    expect(types.MP_PERIOD)
 
 def programHeading():
-    expect(types.types.MP_PROGRAM)
+    expect(types.MP_PROGRAM)
     programIdentifier()
     expect(types.MP_PERIOD)
 """
@@ -100,11 +101,11 @@ VariableDeclarationPart -> "var" VariableDeclaration ";" VariableDeclarationTail
                         -> epsilon
 """
 def variableDeclarationPart():
-    if match(types.types.MP_VAR):
+    if match(types.MP_VAR):
         variableDeclaration()
-        expect(types.types.MP_SCOLON)
+        expect(types.MP_SCOLON)
         variableDeclarationTail()
-    elif match(types.EPSILON):
+    elif match(EPSILON):
         pass
 """
 Rule 7 and 8:
@@ -113,7 +114,7 @@ VariableDeclarationTail -> VariableDeclaration ";" VariableDeclarationTail
 """
 def variableDeclarationTail():
     variableDeclaration()
-    expect("types.MP_SCOLON")
+    expect(types.MP_SCOLON)
     variableDeclarationTail()
     if match(EPSILON):
         pass
@@ -398,7 +399,7 @@ OptionalElsePart -> "else" Statement
 def optionalElsePart():
     if match(types.MP_ELSE):
         statement()
-    elif match(types.EPSILON):
+    elif match(EPSILON):
         pass
 """
 Rule 59:
@@ -455,7 +456,7 @@ StepValue -> "to"
 def stepValue():
     if match(types.MP_TO):
         pass
-    elif match(types.types.MP_DOWNTO):
+    elif match(types.MP_DOWNTO):
         pass
 """
 Rule 66:
