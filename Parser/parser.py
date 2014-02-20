@@ -657,25 +657,25 @@ Rule 107:
 ProgramIdentifier -> Identifier
 """
 def programIdentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.MP_IDENTIFIER)
 """
 Rule 108:
 VariableIdentifier -> Identifier
 """
 def variableIdentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.MP_IDENTIFIER)
 """
 Rule 109:
 ProcedureIdentifier -> Identifier
 """
 def procedureIdentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.MP_IDENTIFIER)
 """
 Rule 110:
 FunctionIdentifier -> Identifier
 """
 def functionIdentifier():
-    expect(IDENTIFIER_CHARS)
+    expect(types.MP_IDENTIFIER)
 """
 Rule 111:
 BooleanExpression -> Expression
@@ -694,7 +694,7 @@ Rule 113:
 IdentifierList -> Identifier IdentifierTail
 """
 def identifierList():
-    expect(IDENTIFIER_CHARS)
+    expect(types.MP_IDENTIFIER)
     identifierTail()
 
 """
@@ -704,7 +704,7 @@ IdentifierList -> "," Identifier IdentifierTail
 """
 def identifierTail():
     if match(types.MP_COMMA):
-        expect(IDENTIFIER_CHARS)
+        expect(types.MP_IDENTIFIER)
         identifierTail()
     elif match(EPSILON):
         pass
