@@ -134,11 +134,11 @@ Type -> "Integer"
      -> "Boolean"
 """
 def Type():
-    if match(types.MP_INTEGER_LIT):
+    if match(types.MP_INTEGER):
         pass
-    elif match(types.MP_FLOAT_LIT):
+    elif match(types.MP_FLOAT):
         pass
-    elif match(types.MP_STRING_LIT):
+    elif match(types.MP_STRING):
         pass
     elif match(types.MP_BOOLEAN):
         pass
@@ -183,13 +183,14 @@ def procedureHeading():
         optionalFormalParameterList()
 """
 Rule 20:
-FunctionHeading -> "function" functionIdentifier OptionalFormalParameterList Type
+FunctionHeading -> "function" functionIdentifier OptionalFormalParameterList ":" Type
 """
 def functionHeading():
     if match(types.MP_FUNCTION):
         functionIdentifier()
         optionalFormalParameterList()
-        type()
+        expect(types.MP_COLON)
+        Type()
 
 """
 Rule 21 and 22:
@@ -606,7 +607,7 @@ FactorTail -> MultiplyingOperator Factor FactorTail
 def factorTail():
     multiplyingOperator()
     factor()
-    factortail()
+    factorTail()
 """
 Rule 94, 95, 96, 97 and 98:
 MultiplyingOperator -> "*"
@@ -638,10 +639,13 @@ Factor -> UnsignedInteger
        -> FunctionIdentifier OptionalActualParameterList
 """
 def factor():
-    unsignedInteger()
-    unsignedFloat()
-    stringLiteral()
-    if match(types.MP_TRUE):
+    if match(types.MP_INTEGER_LIT):
+        pass
+    elif match(types.MP_FLOAT_LIT):
+        pass
+    elif match(types.MP_STRING_LIT):
+        pass
+    elif match(types.MP_TRUE):
         pass
     elif match(types.MP_FALSE):
         pass
@@ -651,7 +655,7 @@ def factor():
         expression()
         expect(types.MP_RPAREN)
     functionIdentifier()
-    optionalactualparameterlist()
+    optionalActualParameterList()
 """
 Rule 107:
 ProgramIdentifier -> Identifier
