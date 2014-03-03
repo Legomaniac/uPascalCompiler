@@ -29,7 +29,6 @@ ReservedWords = {
 "then" : types.MP_THEN,
 "true" : types.MP_TRUE,
 "to" : types.MP_TO,
-"type" : types.MP_TYPE,
 "until" : types.MP_UNTIL,
 "var" : types.MP_VAR,
 "while" : types.MP_WHILE,

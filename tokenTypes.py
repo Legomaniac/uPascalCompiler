@@ -30,7 +30,6 @@ types = Enum([
     "MP_REPEAT",
     "MP_THEN",
     "MP_TO",
-    "MP_TYPE",
     "MP_UNTIL",
     "MP_VAR",
     "MP_WHILE",
