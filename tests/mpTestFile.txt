@@ -1,10 +1,5 @@
 program ObjectPascalExample;
  
-   type
-      THelloWorld = object
-         procedure Put;
-      end;
- 
    procedure THelloWorld.Put;
    begin
       WriteLn('Hello, World!');
