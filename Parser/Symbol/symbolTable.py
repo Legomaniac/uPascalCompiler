@@ -65,7 +65,7 @@ class SymbolTable:
         for r in tableRows:
             if r.lexeme == lexeme:
                 return r
-        return null
+        return None
     
     def addDataSymbolsToTable(classification, ids, attributes):
         if len(attributes) == 1:

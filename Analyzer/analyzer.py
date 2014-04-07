@@ -115,7 +115,11 @@ def genCASTSI():
 def genCASTSF():
     o.write("CASTSF")
 
-def genLabel():
+def genLabel(inRec):
+    if inRec['type'] == recTypes.LABEL:
+        o.writeln(inRec['label'])
+    else:
+        semanticError("Called genBR with type other than LABEL")
     o.write("L")
 
 def genANDS():
@@ -171,7 +175,7 @@ def genBRFS():
 
 def genBR(inRec):
     if inRec['type'] == recTypes.LABEL:
-        o.write("BR " + inRec['branch'])
+        o.writeln("BR " + inRec['label'])
     else:
         semanticError("Called genBR with type other than LABEL")
 

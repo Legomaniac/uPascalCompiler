@@ -117,7 +117,6 @@ def program():
         analyzer.genBR(record)
         #The whole thing
         block(scopeName, {'type':recTypes.BLOCK, 'block':"program"}, record)
-
         #Last token before EOF
         match(types.MP_PERIOD)
     else:
@@ -140,7 +139,9 @@ Block -> VariableDeclarationPart ProcedureAndFunctionDeclarationPart StatementPa
 def block(scope, blockType, label):
     if lookAhead.getType == types.MP_VAR:
         variableDeclarationPart()
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':SymbolStack[-1].getNestingLevel(), 'size':SymbolStack[-1].getTableSize()}
         procedureAndFunctionDeclarationPart()
+        analyzer.genLabel(label)
         statementPart()
     else:
         syntaxError("var, begin, function, procedure")
@@ -197,15 +198,15 @@ Type -> "Integer"
      -> "Boolean"
 """
 def Type():
-    if lookAhead.getType == types.MP_INTEGER_LIT:
-        match(types.MP_INTEGER_LIT)
-        curType = types.MP_INTEGER_LIT
-    elif lookAhead.getType == types.MP_FLOAT_LIT:
-        match(types.MP_FLOAT_LIT)
-        curType = types.MP_FLOAT_LIT
-    elif lookAhead.getType == types.MP_STRING_LIT:
-        match(types.MP_STRING_LIT)
-        curType = types.MP_STRING_LIT
+    if lookAhead.getType == types.MP_INTEGER:
+        match(types.MP_INTEGER)
+        curType = types.MP_INTEGER
+    elif lookAhead.getType == types.MP_FLOAT:
+        match(types.MP_FLOAT)
+        curType = types.MP_FLOAT
+    elif lookAhead.getType == types.MP_STRING:
+        match(types.MP_STRING)
+        curType = types.MP_STRING
     elif lookAhead.getType == types.MP_BOOLEAN:
         match(types.MP_BOOLEAN)
         curType = types.MP_BOOLEAN
