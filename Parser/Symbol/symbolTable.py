@@ -68,7 +68,7 @@ class SymbolTable:
         return null
     
     def addDataSymbolsToTable(classification, ids, attributes):
-        if len(attributes) = 1:
+        if len(attributes) == 1:
             attribute = attributes
             attributes = []
             for i in ids:
@@ -110,20 +110,3 @@ class SymbolTable:
             
         for r in tableRows:
             print "Row " + str(r)
-            
-    
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

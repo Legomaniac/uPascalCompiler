@@ -3,9 +3,11 @@ import sys
 from leaf import Leaf
 sys.path.insert(0, '../')
 from tokens import *
+from recordTypes import recTypes
 import scanner as scanner
 sys.path.insert(0, '/Symbol/')
-import symbolTable as SymbolTable
+import Symbol.symbolTable as SymbolTable
+import Analyzer.analyzer as analyzer
 
 class ParsingError(Exception): pass
 
@@ -71,7 +73,7 @@ def addSymbolTable(scopeName, branchLabel):
             exists = true
             break
     
-    if !exists:
+    if not exists:
         SymbolStack.append(symbolTable(scopeName, branchLabel))
         return true
     else:
@@ -108,9 +110,15 @@ def program():
     if lookAhead.getType == types.MP_PROGRAM:
         scopeName = programHeading()
         branch = getBranch()
+        record = {'type':recTypes.LABEL, 'label':branch}
         addSymbolTable(scopeName, branch)
+        SymbolStack[-1].addDataSymbolsToTable("DISREG", "Old Disreg value", {'type':types.MP_STRING, 'mode':"VALUE"})
         match(types.MP_SCOLON)
-        block(scopeName)
+        analyzer.genBR(record)
+        #The whole thing
+        block(scopeName, {'type':recTypes.BLOCK, 'block':"program"}, record)
+
+        #Last token before EOF
         match(types.MP_PERIOD)
     else:
         syntaxError("program")
@@ -129,7 +137,7 @@ def programHeading():
 Rule 4:
 Block -> VariableDeclarationPart ProcedureAndFunctionDeclarationPart StatementPart
 """
-def block(scope):
+def block(scope, blockType, label):
     if lookAhead.getType == types.MP_VAR:
         variableDeclarationPart()
         procedureAndFunctionDeclarationPart()
@@ -178,6 +186,7 @@ def variableDeclaration():
         idList = identifierList()
         match(types.MP_COLON)
         Type()
+        SymbolStack[-1].addDataSymbolsToTable("VARIABLE", idList, {'type':"t", 'mode':None})
     else:
         syntaxError("identifier")
 """
@@ -1065,7 +1074,12 @@ Rule 107:
 ProgramIdentifier -> Identifier
 """
 def programIdentifier():
-    expect(types.MP_IDENTIFIER)
+    if lookAhead.getType == types.MP_IDENTIFIER:
+        progIdentString = lookAhead.getLexeme()
+        match(types.MP_IDENTIFIER)
+        return progIdentString
+    else:
+        syntaxError("progIdent")
 """
 Rule 108:
 VariableIdentifier -> Identifier
@@ -1102,17 +1116,27 @@ Rule 113:
 IdentifierList -> Identifier IdentifierTail
 """
 def identifierList():
-    expect(types.MP_IDENTIFIER)
-    identifierTail()
+    idList = []
+    if lookAhead.getType == types.MP_IDENTIFIER:
+        idList.append(lookAhead.getLexeme())
+        match(types.MP_IDENTIFIER)
+        identifierTail(idList)
+        return idList
+    else:
+        syntaxError("identList")
 
 """
 Rule 114 and 115:
-IdentifierList -> "," Identifier IdentifierTail
+IdentifierTail -> "," Identifier IdentifierTail
                -> Lambda
 """
-def identifierTail():
-    if match(types.MP_COMMA):
-        expect(types.MP_IDENTIFIER)
-        identifierTail()
-    elif match(EPSILON):
-        pass
+def identifierTail(inList):
+    if lookAhead.getType == types.MP_COMMA:
+        match(types.MP_COMMA)
+        inList.append(lookAhead.getLexeme())
+        match(types.MP_IDENTIFIER)
+        identifierTail(inList)
+    elif lookAhead.getType == types.MP_COLON:
+        Lambda()
+    else:
+        syntaxError("identTail")
