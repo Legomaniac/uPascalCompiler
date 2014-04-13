@@ -1,5 +1,7 @@
 #symbolTable.py
 import sys
+sys.path.insert(0, '../')
+from classifications import classification
 
 class SymbolTable:
     scopeName = None
@@ -7,16 +9,22 @@ class SymbolTable:
     nestingLevel = 0
     tableRows = []
     tableSize = 0
-    variableCount = 0
-    parameterCount = 0
+    varCount = 0
+    parCount = 0
     
     def __init__(self, scopeName, branch):
-        global nestingLevel, tableRows, tableSize, scopeName, branch
+        global nestingLevel, tableRows, tableSize, scopeName, branch, varCount, parCount
         scopeName = scopeName
         branch = branch
         nestingLevel = getAndIncrementNestingLevel()
         tableRows = getAndIncrementTableSize()
         tableSize = 0
+    
+    def getVarCount():
+        return varCount
+    
+    def getParCount():
+        return parCount
     
     def getNestingLevel():
         return nestingLevel
@@ -57,17 +65,23 @@ class SymbolTable:
     
     def insertNewRow(row):
         for r in tableRows:
-            if r.lexeme == row.lexeme:
-                sys.exit("Identifier (" + row.lexeme + ") has already been declared.")
+            if r['lexeme'] == row['lexeme']:
+                sys.exit("Identifier (" + row['lexeme'] + ") has already been declared.")
         tableRows.append(row)
         
     def findSymbol(lexeme):
         for r in tableRows:
-            if r.lexeme == lexeme:
+            if r['lexeme'] == lexeme:
                 return r
         return None
     
-    def addDataSymbolsToTable(classification, ids, attributes):
+    def findSymbol(lexeme, c):
+        for r in tableRows:
+            if r['lexeme'] == lexeme and r['classification'] == c:
+                return r
+        return None
+    
+    def addDataSymbolsToTable(c, ids, attributes):
         if len(attributes) == 1:
             attribute = attributes
             attributes = []
@@ -76,33 +90,29 @@ class SymbolTable:
         for i in ids:
             lex = ids[i]
             attribute = attributes[i]
-            if classification == "VARIABLE":
-                row = [lex, classification, attribute.type, getAndIncrementTableSize(), attribute.mode]
+            if c == classification.VARIABLE:
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
                 insertNewRow(row)
-                variableCount += 1
-                break
-            elif classification == "PARAMETER":
-                row = [lex, classification, attribute.type, getAndIncrementTableSize(), attribute.mode]
+                varCount += 1
+            elif c == classification.PARAMETER:
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
                 insertNewRow(row)
-                parameterCount += 1
-                break
-            elif classification == "RETADDR" or classification == "DISREG":
-                row = [lex, classification, attribute.type, getAndIncrementTableSize(), attribute.mode]
+                parCount += 1
+            elif c == classification.RETADDR or c == classification.DISREG:
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
                 insertNewRow(row)
-                break
             else:
-                break      
+                continue      
 
-    def addModuleSymbolsToTable(classification, lexeme, Type, attributes, branch):
-        if classification == "FUNCTION":
-            row = [lexeme, classification, Type, attributes, branch]
+    def addModuleSymbolsToTable(c, lex, Type, attributes, branch):
+        if c == classification.FUNCTION:
+            row = {'lexeme':lex,'classification':c,'type':Type,'attributes':attributes,'branch':branch}
             insertNewRow(row)
-        elif classification == "PROCEDURE":
-            row = [lexeme, classification, attributes, branch]
+        elif c == classification.PROCEDURE:
+            row = {'lexeme':lex,'classification':c,'attributes':attributes,'branch':branch}
             insertNewRow(row)
         else:
-            print "Failed to add Module Symbol to Table: " + classification
-            pass
+            print "Failed to add Module Symbol to Table: " + c
     
     def printTable():
         print "SymbolTable Name: " + scopeName + ", Nesting Level: " + nestingLevel + ", Branch Label: " +

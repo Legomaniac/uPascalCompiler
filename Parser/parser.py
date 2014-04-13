@@ -1,32 +1,37 @@
 #parser.py
 import sys
 from leaf import Leaf
-sys.path.insert(0, '../')
-from tokens import *
 from recordTypes import recTypes
-import scanner as scanner
+from classifications import classification
+from modes import mode
+from types import varTypes
 sys.path.insert(0, '/Symbol/')
-import Symbol.symbolTable as SymbolTable
-import Analyzer.analyzer as analyzer
+from symbolTable import SymbolTable
+from analyzer import Analyzer
+sys.path.insert(0, '../../')
+from tokens import *
+import scanner as scanner
 
 class ParsingError(Exception): pass
 
 # Use 2 look aheads for parsing
-branch = 1
+labelCounter = 1
 lookAhead = None
 lookAhead2 = None
 indent = 0
-SymbolStack = []
+symbolTables = []
 
 def dq(s): return '"%s"' %s
 # --------------------------------------------------------------
 # Parser Functions
 # --------------------------------------------------------------
 def parse(sourceText):
-    global scanner, lookAhead, lookAhead2, branch
+    global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
     scanner.initialize(sourceText)
     lookAhead = getToken()
     lookAhead2 = getToken()
+    symbolTables = []
+    analyzer = Analyzer(symbolTables)
     systemGoal()
 
 def getToken():
@@ -61,31 +66,31 @@ def Lambda():
 # --------------------------------------------------------------
 # Symbol Table Stack Stuff
 # --------------------------------------------------------------
-def getBranch():
-    num = branch
-    branch += 1
-    return "L" + num
-
+def getNextLabel():
+    label = "L" + str(labelCounter)
+    labelCounter += 1
+    return label
+    
 def addSymbolTable(scopeName, branchLabel):
     exists = false
-    for t in SymbolStack:
+    for t in symbolTables:
         if t.getScopeName() == scopeName:
             exists = true
             break
     
     if not exists:
-        SymbolStack.append(symbolTable(scopeName, branchLabel))
+        symbolTables.append(SymbolTable(scopeName, branchLabel))
         return true
     else:
         semanticError("Symbol table with name: " + scopeName + " already exists")
         return false
     
 def removeSymbolTable():
-    SymbolStack.pop()
+    symbolTables.pop()
     SymbolTable.decrementNestingLevel()
     
 def printSymbolTables():
-    for t in SymbolStack:
+    for t in symbolTables:
         t.printTable()
 
 #-----------------------------------
@@ -112,13 +117,16 @@ def program():
         branch = getBranch()
         record = {'type':recTypes.LABEL, 'label':branch}
         addSymbolTable(scopeName, branch)
-        SymbolStack[-1].addDataSymbolsToTable("DISREG", "Old Disreg value", {'type':types.MP_STRING, 'mode':"VALUE"})
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, 'Old Display Register Value', {'type':Type.STRING, 'mode':mode.VALUE})
         match(types.MP_SCOLON)
         analyzer.genBR(record)
-        #The whole thing
-        block(scopeName, {'type':recTypes.BLOCK, 'block':"program"}, record)
-        #Last token before EOF
+        block(scopeName, {'type':recTypes.BLOCK, 'label':'program'}, record)
         match(types.MP_PERIOD)
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestinglvl':'' + symbolTables[-1].getNestingLevel(), 'tblsize':'' + symbolTables[-1].getTableSize()}
+        analyzer.genProgDR(nameRecord)
+        printSymbolTables()
+        removeSymbolTable()
+        analyzer.genHLT()
     else:
         syntaxError("program")
 """
@@ -137,12 +145,16 @@ Rule 4:
 Block -> VariableDeclarationPart ProcedureAndFunctionDeclarationPart StatementPart
 """
 def block(scope, blockType, label):
-    if lookAhead.getType == types.MP_VAR:
-        variableDeclarationPart()
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':SymbolStack[-1].getNestingLevel(), 'size':SymbolStack[-1].getTableSize()}
-        procedureAndFunctionDeclarationPart()
-        analyzer.genLabel(label)
-        statementPart()
+    if lookAhead.getType == types.MP_BEGIN or \
+        lookAhead.getType == types.MP_FUNCTION or \
+        lookAhead.getType == types.MP_PROCEDURE or \
+        lookAhead.getType == types.MP_VAR:
+            variableDeclarationPart()
+            nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+            procedureAndFunctionDeclarationPart()
+            analyzer.genSpecLabel(label)
+            analyzer.genActRec(nameRecord, blockType)
+            statementPart()
     else:
         syntaxError("var, begin, function, procedure")
 """
@@ -186,8 +198,8 @@ def variableDeclaration():
     if lookAhead.getType == types.MP_IDENTIFIER:
         idList = identifierList()
         match(types.MP_COLON)
-        Type()
-        SymbolStack[-1].addDataSymbolsToTable("VARIABLE", idList, {'type':"t", 'mode':None})
+        t = Type()
+        symbolTables[-1].addDataSymbolsToTable(classification.VARIABLE, idList, {'type':t, 'mode':None})
     else:
         syntaxError("identifier")
 """
@@ -200,16 +212,16 @@ Type -> "Integer"
 def Type():
     if lookAhead.getType == types.MP_INTEGER:
         match(types.MP_INTEGER)
-        curType = types.MP_INTEGER
+        curType = varTypes.INTEGER
     elif lookAhead.getType == types.MP_FLOAT:
         match(types.MP_FLOAT)
-        curType = types.MP_FLOAT
+        curType = varTypes.FLOAT
     elif lookAhead.getType == types.MP_STRING:
         match(types.MP_STRING)
-        curType = types.MP_STRING
+        curType = varTypes.STRING
     elif lookAhead.getType == types.MP_BOOLEAN:
         match(types.MP_BOOLEAN)
-        curType = types.MP_BOOLEAN
+        curType = varTypes.BOOLEAN
     else:
         syntaxError("integer, float, string, boolean")
     return curType
@@ -235,12 +247,16 @@ Rule 17:
 ProcedureDeclaration -> ProcedureHeading ";" Block ";"
 """
 def procedureDeclaration():
-    branch = getBranch()
+    lbl = getNextLabel()
+    branchLbl = {'type':recTypes.LABEL, 'label':lbl}
     if lookAhead.getType == types.MP_PROCEDURE:
-        procedureID = procedureHeading(branch)
+        procedureID = procedureHeading(branchLbl)
         match(types.MP_SCOLON)
-        block(procedureID)
+        block(procedureID, {'type':recTypes.BLOCK, 'label':"procedure"}, branchLbl)
         match(types.MP_SCOLON)
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        analyzer.genProcDR(nameRecord)
+        print "Popping Procedure Table..."
         printSymbolTables()
         removeSymbolTable()
     else:
@@ -250,14 +266,21 @@ Rule 18:
 FunctionDeclaration -> FunctionHeading ";" Block ";"
 """
 def functionDeclaration():
-    branch = getBranch()
+    lbl = getNextLabel()
+    branchLbl = {'type':recTypes.LABEL, 'label':lbl}
     if lookAhead.getType == types.MP_FUNCTION:
-        functionID = functionHeading(branch)
+        functionID = functionHeading(branchLbl)
         match(types.MP_SCOLON)
-        block(functionID)
+        block(functionID, {'type':recTypes.BLOCK, 'label':"function"}, branchLbl)
         match(types.MP_SCOLON)
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        analyzer.genFuncDR(nameRecord)
+        print "Popping Function Table..."
         printSymbolTables()
         removeSymbolTable()
+        row = analyzer.findSymbol(functionID, classification.FUNCTION)
+        if row['returnValue'] is false:
+            semanticError("Function: " + str(functionID) + " is missing return value")
     else:
         syntaxError("function")
 """
@@ -265,6 +288,7 @@ Rule 19:
 ProcedureHeading -> "procedure" procedureIdentifier OptionalFormalParameterList
 """
 def procedureHeading(branchLbl):
+    procID = None
     attributes = []
     ids = []
     if lookAhead.getType == types.MP_PROCEDURE:
@@ -272,13 +296,13 @@ def procedureHeading(branchLbl):
         procID = procedureIdentifier()
         parameters = optionalFormalParameterList()
         for p in parameters:
-            attributes.append(p.getAttribute)
-            ids.append(p.getLexeme)
-        SymbolStack[0].addModuleSymbolsToTable("PROCEDURE", procID, null, attributes, branchLbl)
-        addSymbolTable(procID, branchLbl)
-        SymbolStack[0].addDataSymbolsToTable("DISREG", "Old Display Register Value", {type:"STRING", mode:"VALUE"})
-        SymbolStack[0].addDataSymbolsToTable("PARAMETER", ids, attributes)
-        SymbolStack[0].addDataSymbolsToTable("RETADDR", "Caller's Return Address", {type:"STRING", mode:"VALUE"})
+            attributes.append(p['attribute']) ####????????
+            ids.append(p['lexeme'])
+        symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
+        addSymbolTable(procID, branchLbl['type'])
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", {'type':varTypes.STRING, 'mode':mode.VALUE})
     else:
         syntaxError("procedure")
     return procID
@@ -287,6 +311,7 @@ Rule 20:
 FunctionHeading -> "function" functionIdentifier OptionalFormalParameterList ":" Type
 """
 def functionHeading():
+    funcID = None
     attributes = []
     ids = []
     if lookAhead.getType == types.MP_FUNCTION:
@@ -294,15 +319,15 @@ def functionHeading():
         funcID = functionIdentifier()
         parameters = optionalFormalParameterList()
         for p in parameters:
-            attributes.append(p.getAttribute)
-            ids.append(p.getLexeme)
+            attributes.append(p['attribute'])
+            ids.append(p['lexeme'])
         match(types.MP_COLON)
-        functionType = Type()
-        SymbolStack[0].addModuleSymbolsToTable("FUNCTION", funcID, functionType, attributes, branchLbl)
-        addSymbolTable(procID, branchLbl)
-        SymbolStack[0].addDataSymbolsToTable("DISREG", "Old Display Register Value", {type:"STRING", mode:"VALUE"})
-        SymbolStack[0].addDataSymbolsToTable("PARAMETER", ids, attributes)
-        SymbolStack[0].addDataSymbolsToTable("RETADDR", "Caller's Return Address", {type:"STRING", mode:"VALUE"})
+        t = Type()
+        symbolTables[-1].addModuleSymbolsToTable(classification.FUNCTION, funcID, t, attributes, branchLbl)
+        addSymbolTable(procID, branchLbl['type'])
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", {'type':varTypes.STRING, 'mode':mode.VALUE})
     else:
         syntaxError("function")
     return funcID
@@ -312,6 +337,7 @@ OptionalFormalParameterList -> "(" FormalParameterSection FormalParameterSection
                             -> Lambda
 """
 def optionalFormalParameterList():
+    parameters = None
     if lookAhead.getType == types.MP_LPAREN:
         match(types.MP_LPAREN)
         parameters = formalParameterSection()
@@ -587,7 +613,7 @@ AssignmentStatement -> VariableIdentifier ":=" Expression
 """
 def assignmentStatement():
     if lookAhead.getType == MP_IDENTIFIER:
-        assign = symbolTable.findSymbol(lookAhead.getLexeme())
+        assign = SymbolTable.findSymbol(lookAhead.getLexeme())
         if assign == null:
             semanticError("Undeclared variable: " + lookAhead.getLexeme() + " found.")
         else:
@@ -617,11 +643,16 @@ def ifStatement():
         match(types.MP_IF)
         booleanExpression()
         match(types.MP_THEN)
-        # sem analyzer stuff
+        analyzer.genComment('if')
+        elseLabel = analyzer.genBranchFalse() # BRFS to else lbl
         statement()
-        # sem analyzer stuff
+        analyzer.genComment('skip else part')
+        endLabel = analyzer.genBranchUncond() # BR to end of if statement
+        analyzer.genComment('else part')
+        analyzer.genSpecLabel(elseLabel)
         optionalElsePart()
-        # sem analyzer stuff
+        analyzer.genComment('if end label')
+        analyzer.genSpecLabel(endLabel)
     else:
         syntaxError("if")
 """
@@ -646,11 +677,13 @@ RepeatStatement -> "repeat" StatementSequence "until" BooleanExpression
 def repeatStatement():
     if lookAhead.getType == types.MP_REPEAT:
         match(types.MP_REPEAT)
-        # sem analyzer stuff
+        analyzer.genComment('begin repeat')
+        repeatLabel = analyzer.genLabel()
         statementSequence()
         match(types.MP_UNTIL)
         booleanExpression()
-        # sem analyzer stuff
+        analyzer.genComment('evaluate bool expr and jump to beginning of repeat (if necessary)')
+        analyzer.genBranchFalseTo(repeatLabel)
     else:
         syntaxError("repeat")
 """
@@ -660,12 +693,14 @@ WhileStatement -> "while" BooleanExpression "do" Statement
 def whileStatement():
     if lookAhead.getType == types.MP_WHILE:
         match(types.MP_WHILE)
-        # sem analyzer stuff
+        analyzer.genComment('while')
+        whileLabel = analyzer.genLabel()
         booleanExpression()
-        # sem analyzer stuff
+        endLabel = analyzer.genBranchFalse()
         match(types.MP_DO)
         statement()
-        # sem analyzer stuff
+        analyzer.genBranchUncondTo(whileLabel)
+        analyzer.genSpecLabel(endLabel)
     else:
         syntaxError("while")
 """
@@ -676,10 +711,12 @@ def forStatement():
     if lookAhead.getType == types.MP_FOR:
         match(types.MP_FOR)
         controlIdentifier = controlVariable()
-        # sem analyzer stuff
+        controlSymbol = analyzer.findSymbol(controlIdentifier)
+        controlRec = {'type':recTypes.IDENTIFIER, 'classification':controlSymbol['classification'], 'controlId':controlIdentifier}
         match(types.MP_ASSIGN)
         exp = initialValue()
-        # sem analyzer stuff
+        analyzer.genComment("assign controlVar to init val")
+        analyzer.genAssignFor(controlRec,exp)
         forDirection = stepValue()
         finalExpr = finalValue()
         # sem analyzer stuff
