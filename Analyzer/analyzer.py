@@ -84,16 +84,16 @@ class Analyzer:
     # --------------------------------------------------------------
     # VM Assembly Functions
     # --------------------------------------------------------------
-    def genHLT():
+    def genHLT(self):
         o.write("HLT")
 
-    def genRD():
+    def genRD(self):
         o.write("RD")
 
-    def genRDF():
+    def genRDF(self):
         o.write("RDF")
 
-    def genRDS():
+    def genRDS(self):
         o.write("RDS")
 
     def genWRT():

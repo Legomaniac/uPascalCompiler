@@ -70,18 +70,18 @@ def getNextLabel():
     return label
     
 def addSymbolTable(scopeName, branchLabel):
-    exists = false
+    exists = False
     for t in symbolTables:
         if t.getScopeName() == scopeName:
-            exists = true
+            exists = True
             break
     
     if not exists:
         symbolTables.append(SymbolTable(scopeName, branchLabel))
-        return true
+        return True
     else:
         semanticError("Symbol table with name: " + scopeName + " already exists")
-        return false
+        return False
     
 def removeSymbolTable():
     symbolTables.pop()
@@ -258,7 +258,7 @@ def procedureDeclaration():
         printSymbolTables()
         removeSymbolTable()
     else:
-        sytaxError("procedure")
+        syntaxError("procedure")
 """
 Rule 18:
 FunctionDeclaration -> FunctionHeading ";" Block ";"
@@ -547,8 +547,14 @@ ReadParameter -> VariableIdentifier
 """
 def readParameter():
     if lookAhead.getType == types.MP_IDENTIFIER:
-        variableIdentifier()
-        # sem analyzer stuff
+        iden = variableIdentifier()
+        varSymbol = Analyzer.findSymbol(iden)
+        readId = {'type':recTypes.IDENTIFIER, 'classification':symbol['classification'], 'controlId':iden}
+        if varSymbol['clasification'] == classification.VARIABLE:
+            Analyzer.genRD(readId, True)
+        else:
+
+
     else:
         syntaxError("identifier")
 """
