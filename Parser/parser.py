@@ -12,8 +12,6 @@ sys.path.insert(0, '../../')
 from tokens import *
 import scanner as scanner
 
-class ParsingError(Exception): pass
-
 # Use 2 look aheads for parsing
 labelCounter = 1
 lookAhead = None
@@ -717,12 +715,20 @@ def forStatement():
         exp = initialValue()
         analyzer.genComment("assign controlVar to init val")
         analyzer.genAssignFor(controlRec,exp)
+        forLabel = analyzer.genLabel() # drop for label
+        analyzer.genPushVar(controlRec)
         forDirection = stepValue()
         finalExpr = finalValue()
-        # sem analyzer stuff
+        analyzer.genAssignCast(controlRec, finalExpr)
+        analyzer.genComment("comparing controlVar to finalVal")
+        analyzer.genForComp(forDirection)
+        endForLabel = analyzer.genBranchFalse() # drop end label
         match(types.MP_DO)
         statement()
-        # sem analyzer stuff
+        analyzer.genComment("inc/dec controlVar")
+        analyzer.genForController(controlRec, forDirection)
+        analyzer.genBranchUncondTo(forLabel)
+        analyzer.genSpecLabel(endForLabel)
     else:
         syntaxError("for")
 """
@@ -730,6 +736,7 @@ Rule 62:
 ControlVariable -> VariableIdentifier
 """
 def controlVariable():
+    varID = None
     if lookAhead.getType == types.MP_IDENTIFIER:
         varID = variableIdentifier()
     else:
@@ -740,6 +747,7 @@ Rule 63:
 InitialValue -> OrdinalExpression
 """
 def initialValue():
+    expr = None
     if lookAhead.getType == types.MP_IDENTIFIER or \
         lookAhead.getType == types.MP_FALSE or \
         lookAhead.getType == types.MP_TRUE or \
@@ -760,31 +768,31 @@ StepValue -> "to"
           -> "downto"
 """
 def stepValue():
-    # sem analyzer record
+    forDirection = None
     if lookAhead.getType == types.MP_TO:
         match(types.MP_TO)
-        # create new sem analyzer record
+        forDirection = {'type':recTypes.FOR_DIRECTION, 'tokenType':types.MP_TO}
     elif lookAhead.getType == types.MP_DOWNTO:
         match(types.MP_DOWNTO)
-        # create new sem analyzer record
+        forDirection = {'type':recTypes.FOR_DIRECTION, 'tokenType':types.MP_DOWNTO}
     else:
         syntaxError("to, downto")
-    # return sem analyzer record
+    return forDirection
 """
 Rule 66:
 FinalValue -> OrdinalExpression
 """
 def finalValue():
-    if lookAhead.getType == MP_IDENTIFIER or \
-        lookAhead.getType == MP_FALSE or \
-        lookAhead.getType == MP_TRUE or \
-        lookAhead.getType == MP_STRING_LIT or \
-        lookAhead.getType == MP_FLOAT_LIT or \
-        lookAhead.getType == MP_LPAREN or \
-        lookAhead.getType == MP_NOT or \
-        lookAhead.getType == MP_INTEGER_LIT or \
-        lookAhead.getType == MP_MINUS or \
-        lookAhead.getType == MP_PLUS:
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
             expr = ordinalExpression()
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
@@ -793,7 +801,7 @@ def finalValue():
 Rule 67:
 ProcedureStatement -> ProcedureIdentifier OptionalActualParameterList
 """
-def procedureStatement():
+def procedureStatement(): ################### START HERE JUSTIN #####################
     if lookAhead.getType == types.MP_IDENTIFIER:
         procID = procedureIdentifier()
         # sem analyzer stuff for checking scope

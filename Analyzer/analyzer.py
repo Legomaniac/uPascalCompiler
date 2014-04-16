@@ -1,6 +1,7 @@
 import sys
 sys.path.insert(0, '../')
 from Parser import recordTypes as recTypes
+from tokenTypes import types as tokenTypes
 sys.path.insert(0, '../Parser/')
 from Parser.Symbol import symbolTable
 import parser as parser
@@ -22,7 +23,7 @@ class Analyzer:
     """
     Can pass either the symbol table name or symbol in the table
     """
-    def findSymbolTable(element):
+    def findSymbolTable(self, element):
         tables = symbolTables.reverse()
         for table in tables:
             st = tables[table]
@@ -37,7 +38,7 @@ class Analyzer:
     Calls one of two findSymbol functions on the table depending on
     if the classification is passed or not
     """
-    def findSymbol(lex, c):
+    def findSymbol(self, lex, c):
         tables = symbolTables.reverse()
         for table in tables:
             st = tables[table]
@@ -51,7 +52,7 @@ class Analyzer:
     # --------------------------------------------------------------
     # Error Handling
     # --------------------------------------------------------------
-    def semanticError(inputError):
+    def semanticError(self, inputError):
         sys.exit("Semantic error: " + inputError)
     # --------------------------------------------------------------
     # Semantic Record Helper Functions
@@ -143,19 +144,19 @@ class Analyzer:
     def genDIVF():
         o.write("DIVF")
 
-    def genPUSH():
-        o.write("PUSH")
+    def genPUSH(self, location):
+        o.write("PUSH " + str(location))
 
-    def genPOP():
-        o.write("POP")
+    def genPOP(self, location):
+        o.write("POP " + str(location))
 
     def genNEGS():
         o.write("NEGS")
 
-    def genADDS():
+    def genADDS(self):
         o.write("ADDS")
 
-    def genSUBS():
+    def genSUBS(self):
         o.write("SUBS")
 
     def genMULS():
@@ -182,7 +183,7 @@ class Analyzer:
     def genDIVSF():
         o.write("DIVSF")
 
-    def genCASTSI():
+    def genCASTSI(self):
         o.write("CASTSI")
 
     def genCASTSF():
@@ -243,13 +244,13 @@ class Analyzer:
     def genCMPEQS():
         o.write("CMPEQS")
 
-    def genCMPGES():
+    def genCMPGES(self):
         o.write("CMPGES")
 
     def genCMPGTS():
         o.write("CMPGTS")
 
-    def genCMPLES():
+    def genCMPLES(self):
         o.write("CMPLES")
 
     def genCMPLTS():
@@ -364,11 +365,77 @@ class Analyzer:
     def genPRTR():
         o.write("PRTR")
     
-    def brUncond(label):
+    def brUncond(self, label):
         o.write('BR ' + str(label))
     
+    def genForController(self, controlRec, forDir):
+        inc = false
+        if forDir['type'] == recTypes.FOR_DIRECTION:
+            if forDir['tokenType'] == tokenTypes.MP_TO:
+                inc = true
+            elif forDir['tokenType'] == tokenTypes.MP_DOWNTO:
+                inc = true
+            else:
+                self.semanticError("Invalid FOR_DIRECTION: " + forDir['tokenType'])
+        else:
+            self.semanticError("Cannot use non-FOR_DIRECTION rec type: " + forDir['type'])
+        if controlRec['type'] == recTypes.IDENTIFIER:
+            if controlRec['classification'] == classification.VARIABLE:
+                row = self.findSymbol(controlRec['controlId'])
+                memLocation = self.generateOffset(self.findSymbolTable(row), row)
+                if inc:
+                    genPUSH(memLocation)
+                    genPUSH('#1')
+                    genADDS()
+                    genPOP(memLocation)
+                else:
+                    genPUSH(memLocation)
+                    genPUSH('#1')
+                    genSUBS()
+                    genPOP(memLocation)
+            else:
+                self.semanticError("Cannot use non-var as control var")
+        else:
+            self.semanticError("Cannot use non-identifier as contorl var")
+                    
+    
+    def genForComp(self, forDir):
+        if forDir['type'] == recTypes.FOR_DIRECTION:
+            if forDir['tokenType'] == tokenTypes.MP_TO:
+                genCMPLES()
+            elif forDir['tokenType'] == tokenTypes.MP_DOWNTO:
+                genCMPGES()
+            else:
+                self.semanticError("Invalid FOR_DIRECTION: " + forDir['tokenType'])
+        else:
+            self.semanticError("Cannot use non-FOR_DIRECTION rec type: " + forDir['type'])
+    
+    def genAssignCast(self, leftRec, rightRec):
+        leftType = getSemRecType(leftRec)
+        rightType = getSemRecType(rightRec)
+        returnRec = None
+        if leftType == rightType:
+            returnRec = rightRec
+        elif leftType == varTypes.INTEGER and rightType == varTypes.FLOAT:
+            genCASTSI()
+        elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
+            genCASTSF()
+        else:
+            self.semanticError("Invalid cast from " + rightType + " to " + leftType)
+    
+    def genPushVar(self, varRec):
+        if varRec['type'] == recTypes.IDENTIFIER:
+            if varRec['classification'] == classification.VARIABLE:
+                row = self.findSymbol(varRec['controlId'])
+                memLocation = self.generateOffset(self.findSymbolTable(row),row)
+                genPUSH(memLocation)
+            else:
+                self.semanticError("Cannot push non-VARIABLE onto the stack.")
+        else:
+            self.semanticError("Cannot push non-IDENTIFIER onto the stack.")
+    
     def genAssign(self, Id, exp, symTable):
-        result = self.genAssignCastType(Id, exp)
+        self.genAssignCast(Id, exp)
         leftRow = self.getSemRecIdRow(Id)
         if leftRow['classification'] == classification.VARIABLE:
             leftTable = self.findSymbolTable(leftRow)
