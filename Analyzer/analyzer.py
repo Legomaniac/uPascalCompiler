@@ -115,6 +115,9 @@ class Analyzer:
     def genRDS(self, offset):
         o.write("RDS " + offset)
 
+    def genWrite(self, writeRec):
+
+
     def genWRT(self):
         o.write("WRT")
 

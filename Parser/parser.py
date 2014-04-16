@@ -7,7 +7,7 @@ from modes import mode
 from types import varTypes
 sys.path.insert(0, '/Symbol/')
 from Symbol.symbolTable import SymbolTable
-from Analyzer import analyzer
+from Analyzer.analyzer import Analyzer
 sys.path.insert(0, '../../')
 from tokens import *
 import scanner as scanner
@@ -549,14 +549,14 @@ def readParameter():
     if lookAhead.getType == types.MP_IDENTIFIER:
         iden = variableIdentifier()
         symbolvar = Analyzer.findSymbol(iden)
-        readId = {'type':recTypes.IDENTIFIER, 'classification':symbolvar['classification'], 'controlId':iden}
+        readRecord = {'type':recTypes.IDENTIFIER, 'classification':symbolvar['classification'], 'controlId':iden}
         if symbolvar['classification'] == classification.VARIABLE:
-            Analyzer.genRead(readId, True)
+            Analyzer.genRead(readRecord, True)
         else:
             if symbolvar['mode'] == mode.VARIABLE:
-                Analyzer.genRead(readId, False)
+                Analyzer.genRead(readRecord, False)
             else:
-                Analyzer.genRead(readId, True)
+                Analyzer.genRead(readRecord, True)
     else:
         syntaxError("identifier")
 """
@@ -568,14 +568,16 @@ def writeStatement():
     if lookAhead.getType == types.MP_WRITE:
         match(types.MP_WRITE)
         match(types.MP_LPAREN)
-        writeParameter()
-        writeParameterTail()
+        writeRecord = {'type':recTypes.WRITE_STATEMENT, 'writeType':types.MP_WRITE}
+        writeParameter(writeRecord)
+        writeParameterTail(writeRecord)
         match(types.MP_RPAREN)
     elif lookAhead.getType == types.MP_WRITELN:
         match(types.MP_WRITELN)
         match(types.MP_LPAREN)
-        writeParameter()
-        writeParameterTail()
+        writeRecord = {'type':recTypes.WRITE_STATEMENT, 'writeType':types.MP_WRITELN}
+        writeParameter(writeRecord)
+        writeParameterTail(writeRecord)
         match(types.MP_RPAREN)
     else:
         syntaxError("write, writeln")
@@ -584,7 +586,7 @@ Rule 51 and 52:
 WriteParameterTail -> "," WriteParameter WriteParameterTail
                    -> Lambda
 """
-def writeParameterTail(writeStatement):
+def writeParameterTail(writeRec):
     if lookAhead.getType == types.MP_COMMA:
         match(types.MP_COMMA)
         writeParameter(writeStatement)
@@ -597,7 +599,7 @@ def writeParameterTail(writeStatement):
 Rule 53:
 WriteParameter -> OrdinalExpression
 """
-def writeParameter(writeStatement):
+def writeParameter(writeRec):
     if lookAhead.getType == types.MP_IDENTIFIER or \
         lookAhead.getType == types.MP_FALSE or \
         lookAhead.getType == types.MP_TRUE or \
