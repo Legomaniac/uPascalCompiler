@@ -2,10 +2,10 @@ import sys
 sys.path.insert(0, '../')
 from Parser import recordTypes as recTypes
 sys.path.insert(0, '../Parser/')
-from Symbol import symbolTable
+from Parser.Symbol import symbolTable
 import parser as parser
-from classifications import classification
-from modes import mode
+from Parser.classifications import classification
+from Parser.modes import mode
 
 class Analyzer:
     o = None
@@ -56,23 +56,23 @@ class Analyzer:
     # --------------------------------------------------------------
     # Semantic Record Helper Functions
     # --------------------------------------------------------------
-    def getSemRecType(rec):
+    def getSemRecType(self, rec):
         t = None
         if rec['type'] == recTypes.IDENTIFIER:
-            r = getSemRecIdRow(rec)
+            r = self.getSemRecIdRow(rec)
             t = r['type']
         elif rec['type'] == recTypes.LITERAL:
             t = rec['type']
         else:
-            semanticError("Record type: " + str(rec['type']) + " does not have a type."
+            self.semanticError("Record type: " + str(rec['type']) + " does not have a type.")
         return t
     
-    def getSemRecIdRow(rec):
+    def getSemRecIdRow(self, rec):
         lex = rec['lexeme']
         c = rec['classification']
-        r = findSymbol(lex, c)
+        r = self.findSymbol(lex, c)
         if r is None:
-            semanticError("Identifier: type " + str(c) + " lexeme " + str(lex) + " is not declared in current scope.")
+            self.semanticError("Identifier: type " + str(c) + " lexeme " + str(lex) + " is not declared in current scope.")
         return r
     
     def generateOffset(table, data):
@@ -191,45 +191,45 @@ class Analyzer:
     def label(label):
         o.write(label + ':')
     
-    def genLabel():
+    def genLabel(self):
         label = parser.getNextLabel()
         lblRec = {'type':recTypes.LABEL, 'label':label}
         label(label)
         return lblRec
     
-    def genSpecLabel(nameRec):
+    def genSpecLabel(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            label(nameRec['label'])
+            self.label(nameRec['label'])
         else:
-            semanticError("Can't gen label with info of type: " + str(nameRec['type']))
+            self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
-    def genActRec(nameRec, blockType):
+    def genActRec(self, nameRec, blockType):
         if blockType['type'] == recTypes.BLOCK:
             block = blockType['label']
-            table = findSymbolTable(nameRec['label'])
+            table = self.findSymbolTable(nameRec['label'])
             varCount = table.getVarCount()
             parCount = table.getParCount()
             if block == "program":
-                comment(nameRec['label'] + ' start')
-                add('SP', '#1', 'SP') # reserve space for old register value
-                add('SP', '#' + varCount, 'SP') # reserve space for variables in program
+                self.comment(nameRec['label'] + ' start')
+                o.write("SP #1 SP") # reserve space for old register value
+                o.write("SP #" + varCount + " SP") # reserve space for variables in program
                 register = 'D' + nameRec['nestinglvl']
                 offset = '-' + (varCount + 1) + '(SP)'
-                move(register, offset)
-                sub("SP", "#" + (varCount + 1), register)
-                comment("activation end")
+                self.move(register, offset)
+                self.sub("SP", "#" + (varCount + 1), register)
+                self.comment("activation end")
             elif block == "procedure" or block == "function":
-                comment(nameRec['label'] + ' start')
-                add('SP', '#' + varCount, 'SP') # reserve space for variables in program
+                self.comment(nameRec['label'] + ' start')
+                self.add('SP', '#' + varCount, 'SP') # reserve space for variables in program
                 register = 'D' + nameRec['nestinglvl']
                 offset = '-' + (varCount + parCount + 2) + '(SP)' # slot for both return address and old register value
-                move(register, offset)
-                sub("SP", "#" + (varCount + parCount + 2), register)
-                comment("activation end")
+                self.move(register, offset)
+                self.sub("SP", "#" + (varCount + parCount + 2), register)
+                self.comment("activation end")
             else:
-                semanticError("Block type: " + block + " is not supported")
+                self.semanticError("Block type: " + block + " is not supported")
         else:
-            semanticError("Semantic record: " + str(blockType['type']) + " is not supported for recType.BLOCK param")
+            self.semanticError("Semantic record: " + str(blockType['type']) + " is not supported for recType.BLOCK param")
 
     def genANDS():
         o.write("ANDS")
@@ -282,39 +282,39 @@ class Analyzer:
     def genBRFS():
         o.write("BRFS")
 
-    def genBR(nameRec):
+    def genBR(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
             o.writeln("BR " + nameRec['label'])
         else:
-            semanticError("Called genBR with type other than LABEL")
+            self.semanticError("Called genBR with type other than LABEL")
 
     """
     Generate Program Deactivation Record
     """
-    def genProgDR(nameRec):
-        table = findSymbolTable(nameRec['label'])
+    def genProgDR(self, nameRec):
+        table = self.findSymbolTable(nameRec['label'])
         varCount = table.getVarCount()
         register = 'D' + nameRec['nestinglvl']
         offset = '-' + (varCount + 1) + '(SP)'
-        comment('deactivation start')
-        move(offset, register)
-        sub('SP', '#' + (varCount + 1), 'SP')
-        comment(nameRec['label'] + ' end')
+        self.comment('deactivation start')
+        self.move(offset, register)
+        self.sub('SP', '#' + (varCount + 1), 'SP')
+        self.comment(nameRec['label'] + ' end')
 
     """
     Generate Procedure Deactivation Record
     """
-    def genProcDR(nameRec):
-        table = findSymbolTable(nameRec['label'])
+    def genProcDR(self, nameRec):
+        table = self.findSymbolTable(nameRec['label'])
         varCount = table.getVarCount()
         parCount = table.getParCount()
         register = 'D' + nameRec['nestinglvl']
         offset = '-' + (varCount + parCount + 2) + '(SP)'
-        comment('deactivation start')
-        move(offset, register)
-        sub('SP', '#' + (varCount), 'SP')
-        ret()
-        comment(nameRec['label'] + ' end')
+        self.comment('deactivation start')
+        self.move(offset, register)
+        self.sub('SP', '#' + (varCount), 'SP')
+        self.ret()
+        self.comment(nameRec['label'] + ' end')
 
     def genBEQ():
         o.write("BEQ")
@@ -367,77 +367,77 @@ class Analyzer:
     def brUncond(label):
         o.write('BR ' + str(label))
     
-    def genAssign(Id, exp, symTable):
-        result = genAssignCastType(Id, exp)
-        leftRow = getSemRecIdRow(Id)
+    def genAssign(self, Id, exp, symTable):
+        result = self.genAssignCastType(Id, exp)
+        leftRow = self.getSemRecIdRow(Id)
         if leftRow['classification'] == classification.VARIABLE:
-            leftTable = findSymbolTable(leftRow)
-            leftOffset = generateOffset(leftTable, leftRow)
-            pop(leftOffset)
+            leftTable = self.findSymbolTable(leftRow)
+            leftOffset = self.generateOffset(leftTable, leftRow)
+            self.pop(leftOffset)
         elif leftRow['classification'] == classification.FUNCTION:
             funcRow = leftRow
             nestingLevel = symTable['nestingLevel']
             register = 'D' + nameRec['nestingLevel']
             offset = '-1(' + register + ')'
-            pop(offset)
-            funcRow['returnValue'] = true
+            self.pop(offset)
+            funcRow['returnValue'] = True
         elif leftRow['classification'] == classification.PARAMETER:
-            leftTable = findSymbolTable(leftRow)
+            leftTable = self.findSymbolTable(leftRow)
             row = leftRow
             paramMode = row['mode']
             offset = None
             if paramMode == mode.VALUE:
-                offset = generateOffset(leftTable, row)
-                pop(offset)
+                offset = self.generateOffset(leftTable, row)
+                self.pop(offset)
             elif paramMode == mode.VARIABLE:
-                offset = '@' + generateOffset(leftTable, row)
-                pop(offset)
+                offset = '@' + self.generateOffset(leftTable, row)
+                self.pop(offset)
     
-    def genAssignFor(Id, exp):
-        idType = getSemRecType(Id)
+    def genAssignFor(self, Id, exp):
+        idType = self.getSemRecType(Id)
         if idType == varTypes.INTEGER:
-            genAssign(Id, exp, None)
+            self.genAssign(Id, exp, None)
         else:
-            semanticError("The 'for' loop's control var must be of type Integer")
+            self.semanticError("The 'for' loop's control var must be of type Integer")
     
-    def genBranchUncond():
+    def genBranchUncond(self):
         label = parser.getNextLabel()
         lblRec = {'type':recTypes.LABEL, 'label':label}
-        brUncond(label)
+        self.brUncond(label)
         return lblRec
     
-    def genBranchUncondTo(nameRec):
+    def genBranchUncondTo(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            brUncond(nameRec['label'])
+            self.brUncond(nameRec['label'])
         else:
-            semanticError("Can't gen label with info of type: " + str(nameRec['type']))
+            self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
-    def genBranchTrueTo(nameRec):
+    def genBranchTrueTo(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            branchTrue(nameRec['label'])
+            self.branchTrue(nameRec['label'])
         else:
-            semanticError("Can't gen label with info of type: " + str(nameRec['type']))
+            self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
-    def genBranchFalseTo(nameRec):
+    def genBranchFalseTo(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            branchFalse(nameRec['label'])
+            self.branchFalse(nameRec['label'])
         else:
-            semanticError("Can't gen label with info of type: " + str(nameRec['type']))
+            self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
-    def genBranchTrue():
+    def genBranchTrue(self):
         label = parser.getNextLabel()
         lblRec = {'type':recTypes.LABEL, 'label':label}
-        branchTrue(label)
+        self.branchTrue(label)
         return lblRec
     
-    def genBranchFalse():
+    def genBranchFalse(self):
         label = parser.getNextLabel()
         lblRec = {'type':recTypes.LABEL, 'label':label}
-        branchFalse(label)
+        self.branchFalse(label)
         return lblRec
     
-    def genComment(comment):
-        comment(comment)
+    def genComment(self, inComment):
+        self.comment(inComment)
         
     def comment(comment):
         o.writeln('\t ' + str(comment))
