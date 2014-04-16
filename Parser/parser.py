@@ -277,7 +277,7 @@ def functionDeclaration():
         printSymbolTables()
         removeSymbolTable()
         row = analyzer.findSymbol(functionID, classification.FUNCTION)
-        if row['returnValue'] is false:
+        if row['returnValue'] is False:
             semanticError("Function: " + str(functionID) + " is missing return value")
     else:
         syntaxError("function")
@@ -548,13 +548,15 @@ ReadParameter -> VariableIdentifier
 def readParameter():
     if lookAhead.getType == types.MP_IDENTIFIER:
         iden = variableIdentifier()
-        varSymbol = Analyzer.findSymbol(iden)
-        readId = {'type':recTypes.IDENTIFIER, 'classification':symbol['classification'], 'controlId':iden}
-        if varSymbol['clasification'] == classification.VARIABLE:
-            Analyzer.genRD(readId, True)
+        symbolvar = Analyzer.findSymbol(iden)
+        readId = {'type':recTypes.IDENTIFIER, 'classification':symbolvar['classification'], 'controlId':iden}
+        if symbolvar['classification'] == classification.VARIABLE:
+            Analyzer.genRead(readId, True)
         else:
-
-
+            if symbolvar['mode'] == mode.VARIABLE:
+                Analyzer.genRead(readId, False)
+            else:
+                Analyzer.genRead(readId, True)
     else:
         syntaxError("identifier")
 """
@@ -1137,7 +1139,12 @@ Rule 108:
 VariableIdentifier -> Identifier
 """
 def variableIdentifier():
-    expect(types.MP_IDENTIFIER)
+    if lookAhead.getType == types.MP_IDENTIFIER:
+        lex = lookAhead.getLexeme()
+        match(types.MP_IDENTIFIER)
+        return lex
+    else:
+        syntaxError("variableIdent")
 """
 Rule 109:
 ProcedureIdentifier -> Identifier

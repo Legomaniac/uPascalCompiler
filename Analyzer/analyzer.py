@@ -7,6 +7,7 @@ from Parser.Symbol import symbolTable
 import parser as parser
 from Parser.classifications import classification
 from Parser.modes import mode
+from Parser.types import varTypes
 
 class Analyzer:
     o = None
@@ -78,7 +79,7 @@ class Analyzer:
     
     def generateOffset(table, data):
         nestingLvl = str(table.getNestingLevel())
-        memOffset = str(table['offset'])
+        memOffset = str(data['offset'])
         nestingLvl = 'D' + nestingLvl
         return memOffset + '(' + nestingLvl + ')'
     # --------------------------------------------------------------
@@ -87,14 +88,32 @@ class Analyzer:
     def genHLT(self):
         o.write("HLT")
 
-    def genRD(self):
-        o.write("RD")
+    def genRead(self, readRec, isVar):
+        thisRow = self.getSemRecIdRow(readRec)
+        thisType = thisRow['type']
+        thisTable = self.findSymbolTable(thisRow)
+        if isVar:
+            thisoffset = self.generateOffset(thisTable, thisRow)
+        else:
+            thisoffset = "@" + self.generateOffset(thisTable, thisRow)
 
-    def genRDF(self):
-        o.write("RDF")
+        if thisType == varTypes.INTEGER:
+            self.genRD(thisoffset)
+        elif thisType == varTypes.FLOAT:
+            self.genRDF(thisoffset)
+        elif thisType == varTypes.STRING:
+            self.genRDS(thisoffset)
+        else:
+            self.semanticError("Can't read into a variable of " + str(thisType))
 
-    def genRDS(self):
-        o.write("RDS")
+    def genRD(self, offset):
+        o.write("RD " + offset)
+
+    def genRDF(self, offset):
+        o.write("RDF " + offset)
+
+    def genRDS(self, offset):
+        o.write("RDS " + offset)
 
     def genWRT():
         o.write("WRT")

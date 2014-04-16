@@ -13,75 +13,74 @@ class SymbolTable:
     parCount = 0
     
     def __init__(self, scopeName, branch):
-        global nestingLevel, tableRows, tableSize, scopeName, branch, varCount, parCount
         scopeName = scopeName
         branch = branch
-        nestingLevel = getAndIncrementNestingLevel()
-        tableRows = getAndIncrementTableSize()
+        nestingLevel = self.getAndIncrementNestingLevel()
+        tableRows = self.getAndIncrementTableSize()
         tableSize = 0
     
-    def getVarCount():
-        return varCount
+    def getVarCount(self):
+        return self.varCount
     
-    def getParCount():
-        return parCount
+    def getParCount(self):
+        return self.parCount
     
-    def getNestingLevel():
-        return nestingLevel
+    def getNestingLevel(self):
+        return self.nestingLevel
     
-    def getTableSize():
-        return tableSize
+    def getTableSize(self):
+        return self.tableSize
     
-    def getScopeName():
-        return scopeName
+    def getScopeName(self):
+        return self.scopeName
     
-    def getBranch():
-        return branch
+    def getBranch(self):
+        return self.branch
     
-    def getSymbolTable():
-        return tableRows
+    def getSymbolTable(self):
+        return self.tableRows
     
-    def getAndIncrementTableSize():
-        curSize = tableSize
-        tableSize += 1
+    def getAndIncrementTableSize(self):
+        curSize = self.tableSize
+        self.tableSize += 1
         return curSize
     
-    def getAndIncrementNestingLevel():
-        curLevel = nestingLevel
-        nestingLevel += 1
+    def getAndIncrementNestingLevel(self):
+        curLevel = self.nestingLevel
+        self.nestingLevel += 1
         return curLevel
     
-    def decrementTableSize():
-        tableSize -= 1
+    def decrementTableSize(self):
+        self.tableSize -= 1
         
-    def decrementNestingLevel():
-        nestingLevel -= 1
+    def decrementNestingLevel(self):
+        self.nestingLevel -= 1
     
-    def contains(row):
-        for r in tableRows:
+    def contains(self, row):
+        for r in self.tableRows:
             if r == row:
-                return true
-        return false
+                return True
+        return False
     
-    def insertNewRow(row):
-        for r in tableRows:
+    def insertNewRow(self, row):
+        for r in self.tableRows:
             if r['lexeme'] == row['lexeme']:
                 sys.exit("Identifier (" + row['lexeme'] + ") has already been declared.")
-        tableRows.append(row)
+        self.tableRows.append(row)
         
-    def findSymbol(lexeme):
-        for r in tableRows:
+    def findSymbol(self, lexeme):
+        for r in self.tableRows:
             if r['lexeme'] == lexeme:
                 return r
         return None
     
-    def findSymbol(lexeme, c):
-        for r in tableRows:
+    def findSymbol(self, lexeme, c):
+        for r in self.tableRows:
             if r['lexeme'] == lexeme and r['classification'] == c:
                 return r
         return None
     
-    def addDataSymbolsToTable(c, ids, attributes):
+    def addDataSymbolsToTable(self, c, ids, attributes):
         if len(attributes) == 1:
             attribute = attributes
             attributes = []
@@ -91,32 +90,31 @@ class SymbolTable:
             lex = ids[i]
             attribute = attributes[i]
             if c == classification.VARIABLE:
-                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
-                insertNewRow(row)
-                varCount += 1
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':self.getAndIncrementTableSize(), 'mode':attribute['mode']}
+                self.insertNewRow(row)
+                self.varCount += 1
             elif c == classification.PARAMETER:
-                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
-                insertNewRow(row)
-                parCount += 1
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':self.getAndIncrementTableSize(), 'mode':attribute['mode']}
+                self.insertNewRow(row)
+                self.varCount += 1
             elif c == classification.RETADDR or c == classification.DISREG:
-                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':getAndIncrementTableSize(), 'mode':attribute['mode']}
-                insertNewRow(row)
+                row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':self.getAndIncrementTableSize(), 'mode':attribute['mode']}
+                self.insertNewRow(row)
             else:
                 continue      
 
-    def addModuleSymbolsToTable(c, lex, Type, attributes, branch):
+    def addModuleSymbolsToTable(self, c, lex, Type, attributes, branch):
         if c == classification.FUNCTION:
             row = {'lexeme':lex,'classification':c,'type':Type,'attributes':attributes,'branch':branch}
-            insertNewRow(row)
+            self.insertNewRow(row)
         elif c == classification.PROCEDURE:
             row = {'lexeme':lex,'classification':c,'attributes':attributes,'branch':branch}
-            insertNewRow(row)
+            self.insertNewRow(row)
         else:
             print "Failed to add Module Symbol to Table: " + c
     
-    def printTable():
-        print "SymbolTable Name: " + scopeName + ", Nesting Level: " + nestingLevel + ", Branch Label: " +
-            branch + ", Size: " + tableSize
+    def printTable(self):
+        print "SymbolTable Name: " + self.scopeName + ", Nesting Level: " + self.nestingLevel + ", Branch Label: " + self.branch + ", Size: " + self.tableSize
             
-        for r in tableRows:
+        for r in self.tableRows:
             print "Row " + str(r)
