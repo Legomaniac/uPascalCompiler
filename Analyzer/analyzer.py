@@ -115,52 +115,52 @@ class Analyzer:
     def genRDS(self, offset):
         o.write("RDS " + offset)
 
-    def genWRT():
+    def genWRT(self):
         o.write("WRT")
 
-    def genWRTS():
+    def genWRTS(self):
         o.write("WRTS")
 
-    def genWRTLN():
+    def genWRTLN(self):
         o.write("WRTLN")
 
-    def genWRTLNS():
+    def genWRTLNS(self):
         o.write("WRTLNS")
 
-    def genMOV():
+    def genMOV(self):
         o.write("MOV")
 
-    def genNEG():
+    def genNEG(self):
         o.write("NEG")
 
-    def genADD():
+    def genADD(self):
         o.write("ADD")
 
-    def genSUB():
+    def genSUB(self):
         o.write("SUB")
 
-    def genMUL():
+    def genMUL(self):
         o.write("MUL")
 
-    def genDIV():
+    def genDIV(self):
         o.write("DIV")
 
-    def genMOD():
+    def genMOD(self):
         o.write("MOD")
 
-    def genNEGF():
+    def genNEGF(self):
         o.write("NEGF")
 
-    def genADDF():
+    def genADDF(self):
         o.write("ADDF")
 
-    def genSUBF():
+    def genSUBF(self):
         o.write("SUBF")
 
-    def genMULF():
+    def genMULF(self):
         o.write("MULF")
 
-    def genDIVF():
+    def genDIVF(self):
         o.write("DIVF")
 
     def genPUSH(self, location):
@@ -169,7 +169,7 @@ class Analyzer:
     def genPOP(self, location):
         o.write("POP " + str(location))
 
-    def genNEGS():
+    def genNEGS(self):
         o.write("NEGS")
 
     def genADDS(self):
@@ -178,37 +178,37 @@ class Analyzer:
     def genSUBS(self):
         o.write("SUBS")
 
-    def genMULS():
+    def genMULS(self):
         o.write("MULS")
 
-    def genDIVS():
+    def genDIVS(self):
         o.write("DIVS")
 
-    def genMODS():
+    def genMODS(self):
         o.write("MODS")
 
-    def genNEGSF():
+    def genNEGSF(self):
         o.write("NEGSF")
 
-    def genADDSF():
+    def genADDSF(self):
         o.write("ADDSF")
 
-    def genSUBSF():
+    def genSUBSF(self):
         o.write("SUBSF")
 
-    def genMULSF():
+    def genMULSF(self):
         o.write("MULSF")
 
-    def genDIVSF():
+    def genDIVSF(self):
         o.write("DIVSF")
 
     def genCASTSI(self):
         o.write("CASTSI")
 
-    def genCASTSF():
+    def genCASTSF(self):
         o.write("CASTSF")
 
-    def label(label):
+    def label(self, label):
         o.write(label + ':')
     
     def genLabel(self):
@@ -251,55 +251,55 @@ class Analyzer:
         else:
             self.semanticError("Semantic record: " + str(blockType['type']) + " is not supported for recType.BLOCK param")
 
-    def genANDS():
+    def genANDS(self):
         o.write("ANDS")
 
-    def genORS():
+    def genORS(self):
         o.write("ORS")
 
-    def genNOTS():
+    def genNOTS(self):
         o.write("NOTS")
 
-    def genCMPEQS():
+    def genCMPEQS(self):
         o.write("CMPEQS")
 
     def genCMPGES(self):
         o.write("CMPGES")
 
-    def genCMPGTS():
+    def genCMPGTS(self):
         o.write("CMPGTS")
 
     def genCMPLES(self):
         o.write("CMPLES")
 
-    def genCMPLTS():
+    def genCMPLTS(self):
         o.write("CMPLTS")
 
-    def genCMPNES():
+    def genCMPNES(self):
         o.write("CMPNES")
 
-    def genCMPEQSF():
+    def genCMPEQSF(self):
         o.write("CMPEQSF")
 
-    def genCMPGESF():
+    def genCMPGESF(self):
         o.write("CMPGESF")
 
-    def genCMPGTSF():
+    def genCMPGTSF(self):
         o.write("CMPGTSF")
 
-    def genCMPLESF():
+    def genCMPLESF(self):
         o.write("CMPLESF")
 
-    def genCMPLTSF():
+    def genCMPLTSF(self):
         o.write("CMPLTSF")
 
-    def genCMPNESF():
+    def genCMPNESF(self):
         o.write("CMPNESF")
 
-    def genBRTS():
+    def genBRTS(self):
         o.write("BRTS")
 
-    def genBRFS():
+    def genBRFS(self):
         o.write("BRFS")
 
     def genBR(self, nameRec):
@@ -336,64 +336,64 @@ class Analyzer:
         self.ret()
         self.comment(nameRec['label'] + ' end')
 
-    def genBEQ():
+    def genBEQ(self):
         o.write("BEQ")
 
-    def genBGE():
+    def genBGE(self):
         o.write("BGE")
 
-    def genBGT():
+    def genBGT(self):
         o.write("BGT")
 
-    def genBLE():
+    def genBLE(self):
         o.write("BLE")
 
-    def genBLT():
+    def genBLT(self):
         o.write("BLT")
 
-    def genBNE():
+    def genBNE(self):
         o.write("BNE")
 
-    def genBEQF():
+    def genBEQF(self):
         o.write("BEQF")
 
-    def genBGEF():
+    def genBGEF(self):
         o.write("BGEF")
 
-    def genBFTF():
+    def genBFTF(self):
         o.write("BGTF")
 
-    def genBLEF():
+    def genBLEF(self):
         o.write("BLEF")
 
-    def genBLTF():
+    def genBLTF(self):
         o.write("BLTF")
 
-    def genBNEF():
+    def genBNEF(self):
         o.write("BNEF")
 
-    def genCALL():
+    def genCALL(self):
         o.write("CALL")
 
-    def genRET():
+    def genRET(self):
         o.write("RET")
 
-    def genPRTS():
+    def genPRTS(self):
         o.write("PRTS")
 
-    def genPRTR():
+    def genPRTR(self):
         o.write("PRTR")
     
     def brUncond(self, label):
         o.write('BR ' + str(label))
     
     def genForController(self, controlRec, forDir):
-        inc = false
+        inc = False
         if forDir['type'] == recTypes.FOR_DIRECTION:
             if forDir['tokenType'] == tokenTypes.MP_TO:
-                inc = true
+                inc = True
             elif forDir['tokenType'] == tokenTypes.MP_DOWNTO:
-                inc = true
+                inc = True
             else:
                 self.semanticError("Invalid FOR_DIRECTION: " + forDir['tokenType'])
         else:
@@ -403,15 +403,15 @@ class Analyzer:
                 row = self.findSymbol(controlRec['controlId'])
                 memLocation = self.generateOffset(self.findSymbolTable(row), row)
                 if inc:
-                    genPUSH(memLocation)
-                    genPUSH('#1')
-                    genADDS()
-                    genPOP(memLocation)
+                    self.genPUSH(memLocation)
+                    self.genPUSH('#1')
+                    self.genADDS()
+                    self.genPOP(memLocation)
                 else:
-                    genPUSH(memLocation)
-                    genPUSH('#1')
-                    genSUBS()
-                    genPOP(memLocation)
+                    self.genPUSH(memLocation)
+                    self.genPUSH('#1')
+                    self.genSUBS()
+                    self.genPOP(memLocation)
             else:
                 self.semanticError("Cannot use non-var as control var")
         else:
@@ -421,24 +421,24 @@ class Analyzer:
     def genForComp(self, forDir):
         if forDir['type'] == recTypes.FOR_DIRECTION:
             if forDir['tokenType'] == tokenTypes.MP_TO:
-                genCMPLES()
+                self.genCMPLES()
             elif forDir['tokenType'] == tokenTypes.MP_DOWNTO:
-                genCMPGES()
+                self.genCMPGES()
             else:
                 self.semanticError("Invalid FOR_DIRECTION: " + forDir['tokenType'])
         else:
             self.semanticError("Cannot use non-FOR_DIRECTION rec type: " + forDir['type'])
     
     def genAssignCast(self, leftRec, rightRec):
-        leftType = getSemRecType(leftRec)
-        rightType = getSemRecType(rightRec)
+        leftType = self.getSemRecType(leftRec)
+        rightType = self.getSemRecType(rightRec)
         returnRec = None
         if leftType == rightType:
             returnRec = rightRec
         elif leftType == varTypes.INTEGER and rightType == varTypes.FLOAT:
-            genCASTSI()
+            self.genCASTSI()
         elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
-            genCASTSF()
+            self.genCASTSF()
         else:
             self.semanticError("Invalid cast from " + rightType + " to " + leftType)
     
@@ -447,7 +447,7 @@ class Analyzer:
             if varRec['classification'] == classification.VARIABLE:
                 row = self.findSymbol(varRec['controlId'])
                 memLocation = self.generateOffset(self.findSymbolTable(row),row)
-                genPUSH(memLocation)
+                self.genPUSH(memLocation)
             else:
                 self.semanticError("Cannot push non-VARIABLE onto the stack.")
         else:

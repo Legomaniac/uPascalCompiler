@@ -6,8 +6,8 @@ from classifications import classification
 from modes import mode
 from types import varTypes
 sys.path.insert(0, '/Symbol/')
-from symbolTable import SymbolTable
-from analyzer import Analyzer
+from Symbol.symbolTable import SymbolTable
+from Analyzer import analyzer
 sys.path.insert(0, '../../')
 from tokens import *
 import scanner as scanner
