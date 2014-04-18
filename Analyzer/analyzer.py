@@ -115,8 +115,11 @@ class Analyzer:
     def genRDS(self, offset):
         o.write("RDS " + offset)
 
-    def genWrite(self, writeRec):
-
+    def genWrite(self, writeRec, expRec):
+        if writeRec['writeType'] == tokenTypes.MP_WRITE:
+            self.genWRTS()
+        else:
+            self.genWRTLNS()
 
     def genWRT(self):
         o.write("WRT")
@@ -389,7 +392,31 @@ class Analyzer:
     
     def brUncond(self, label):
         o.write('BR ' + str(label))
-    
+
+    def genCast(self, left, right):
+        leftType = self.getSemRecType(left)
+        rightType = self.getSemRecType(right)
+        arrayRec = []
+        if leftType == rightType:
+            arrayRec[1] = left
+            arrayRec[2] = right
+        elif leftType == varTypes.INTEGER and rightType == varTypes.FLOAT:
+            self.genSUB()
+            #Fix dis
+            self.genCASTSF()
+            self.genADD()
+            #Fix dis
+            arrayRec[0] = {'type':recTypes.LITERAL, 'varType':varTypes.MP_FLOAT}
+            arrayRec[1] = right
+        elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
+            self.genCASTSI()
+            arrayRec[0] = left
+            arrayRec[1] = {'type':recTypes.LITERAL, 'varType':varTypes.MP_FLOAT}
+        else:
+            self.semanticError("Invalid casting from " + rightType + " to " + leftType)
+            return None
+        return arrayRec
+
     def genForController(self, controlRec, forDir):
         inc = False
         if forDir['type'] == recTypes.FOR_DIRECTION:
@@ -524,6 +551,45 @@ class Analyzer:
         lblRec = {'type':recTypes.LABEL, 'label':label}
         self.branchFalse(label)
         return lblRec
+
+    def genOptRelPart(self, left, op, right):
+        if left is not None and op is not None and right is not None:
+            results = self.genCast(left, right)
+            resultType = self.getSemRecType(results[0])
+            relOp = op['token']
+            if resultType == tokenTypes.MP_INTEGER:
+                if relOp == tokenTypes.MP_NEQUAL:
+                    self.genCMPNES()
+                elif relOp == tokenTypes.MP_GEQUAL:
+                    self.genCMPGES()
+                elif relOp == tokenTypes.MP_LEQUAL:
+                    self.genCMPLES()
+                elif relOp == tokenTypes.MP_GTHAN:
+                    self.genCMPGTS()
+                elif relOp == tokenTypes.MP_LTHAN:
+                    self.genCMPLTS()
+                elif relOp == tokenTypes.MP_EQUAL:
+                    self.genCMPGES()
+                else:
+                    self.semanticError(relOp + " isn't an operator for " + resultType)
+            elif resultType == tokenTypes.MP_FLOAT:
+                if relOp == tokenTypes.MP_NEQUAL:
+                    self.genCMPNESF()
+                elif relOp == tokenTypes.MP_GEQUAL:
+                    self.genCMPGESF()
+                elif relOp == tokenTypes.MP_LEQUAL:
+                    self.genCMPLESF()
+                elif relOp == tokenTypes.MP_GTHAN:
+                    self.genCMPGTSF()
+                elif relOp == tokenTypes.MP_LTHAN:
+                    self.genCMPLTSF()
+                elif relOp == tokenTypes.MP_EQUAL:
+                    self.genCMPGESF()
+                else:
+                    self.semanticError(relOp + " isn't an operator for " + resultType)
+            else:
+                self.semanticError(resultType + " doesn't have relOps")
+
     
     def genComment(self, inComment):
         self.comment(inComment)

@@ -385,7 +385,7 @@ def valueParameterSection():
         match(types.MP_COLON)
         Type = Type()
         for lex in ids:
-            parameters.append({lexeme:lex, attribute:{type:Type, mode:"VALUE"}})
+            parameters.append({'lexeme':lex, 'attribute':{type:Type, mode:"VALUE"}})
     else:
         syntaxError("identifier")
     return parameters
@@ -401,7 +401,7 @@ def variableParameterSection():
         match(types.MP_COLON)
         Type = Type()
         for lex in ids:
-            parameters.append({lexeme:lex, attribute:{type:Type, mode:"VALUE"}})
+            parameters.append({'lexeme':lex, 'attribute':{type:Type, mode:"VALUE"}})
     else:
         syntaxError("var")
     return parameters
@@ -589,8 +589,8 @@ WriteParameterTail -> "," WriteParameter WriteParameterTail
 def writeParameterTail(writeRec):
     if lookAhead.getType == types.MP_COMMA:
         match(types.MP_COMMA)
-        writeParameter(writeStatement)
-        writeParameterTail(writeStatement)
+        writeParameter(writeRec)
+        writeParameterTail(writeRec)
     elif lookAhead.getType == types.MP_RPAREN:
         Lambda()
     else:
@@ -610,8 +610,8 @@ def writeParameter(writeRec):
         lookAhead.getType == types.MP_INTEGER_LIT or \
         lookAhead.getType == types.MP_MINUS or \
         lookAhead.getType == types.MP_PLUS:
-            ordinalExpression()
-            # sem analyzer stuff
+            expRec = ordinalExpression(None)
+            Analyzer.genWrite(writeRec, expRec)
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
 """
@@ -620,9 +620,10 @@ AssignmentStatement -> VariableIdentifier ":=" Expression
                     -> FunctionIdentifier ":=" Expression
 """
 def assignmentStatement():
-    if lookAhead.getType == MP_IDENTIFIER:
+
+    if lookAhead.getType == types.MP_IDENTIFIER:
         assign = SymbolTable.findSymbol(lookAhead.getLexeme())
-        if assign == null:
+        if assign == None:
             semanticError("Undeclared variable: " + lookAhead.getLexeme() + " found.")
         else:
             if assign.classification == "VARIABLE" or \
@@ -630,13 +631,13 @@ def assignmentStatement():
                 varID = variableIdentifier()
                 # sem analyzer stuff
                 match(types.MP_ASSIGN)
-                exp = expression(null)
+                exp = expression(None)
                 # sem analyzer stuff
             elif assign.classification == "FUNCTION":
                 funcID = functionIdentifier()
                 # sem analyzer stuff
                 match(types.MP_ASSIGN)
-                exp = expression(null)
+                exp = expression(None)
                 # sem analyzer stuff
             else:
                 semanticError("Cannot assign value to a Procedure")
@@ -768,7 +769,7 @@ def initialValue():
         lookAhead.getType == types.MP_INTEGER_LIT or \
         lookAhead.getType == types.MP_MINUS or \
         lookAhead.getType == types.MP_PLUS:
-            expr = ordinalExpression(null)
+            expr = ordinalExpression(None)
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
     return expr
@@ -878,16 +879,16 @@ Rule 72:
 ActualParameter -> OrdinalExpression
 """
 def actualParameter(formalParams):
-    if lookAhead.getType == MP_IDENTIFIER or \
-        lookAhead.getType == MP_FALSE or \
-        lookAhead.getType == MP_TRUE or \
-        lookAhead.getType == MP_STRING_LIT or \
-        lookAhead.getType == MP_FLOAT_LIT or \
-        lookAhead.getType == MP_LPAREN or \
-        lookAhead.getType == MP_NOT or \
-        lookAhead.getType == MP_INTEGER_LIT or \
-        lookAhead.getType == MP_MINUS or \
-        lookAhead.getType == MP_PLUS:
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
             # sem formal param check
             expr = ordinalExpression()
     else:
@@ -897,16 +898,17 @@ Rule 73:
 Expression -> SimpleExpression OptionalRelationalPart
 """
 def expression(formalParam):
-    if lookAhead.getType == MP_IDENTIFIER or \
-        lookAhead.getType == MP_FALSE or \
-        lookAhead.getType == MP_TRUE or \
-        lookAhead.getType == MP_STRING_LIT or \
-        lookAhead.getType == MP_FLOAT_LIT or \
-        lookAhead.getType == MP_LPAREN or \
-        lookAhead.getType == MP_NOT or \
-        lookAhead.getType == MP_INTEGER_LIT or \
-        lookAhead.getType == MP_MINUS or \
-        lookAhead.getType == MP_PLUS:
+    expr = None
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
             simpExpr = simpleExpression(formalParam)
             opt = optionalRelationalPart(simpExpr)
             if opt:
@@ -921,30 +923,32 @@ Rule 74 and 75:
 OptionalRelationalPart -> RelationalOperator SimpleExpression
                        -> Lambda
 """
-def optionalRelationalPart():
-    if lookAhead.getType == MP_COMMA or \
-        lookAhead.getType == MP_RPAREN or \
-        lookAhead.getType == MP_DOWNTO or \
-        lookAhead.getType == MP_TO or \
-        lookAhead.getType == MP_DO or \
-        lookAhead.getType == MP_UNTIL or \
-        lookAhead.getType == MP_ELSE or \
-        lookAhead.getType == MP_THEN or \
-        lookAhead.getType == MP_SCOLON or \
-        lookAhead.getType == MP_END:
+def optionalRelationalPart(left):
+    opt = {}
+    if lookAhead.getType == types.MP_COMMA or \
+        lookAhead.getType == types.MP_RPAREN or \
+        lookAhead.getType == types.MP_DOWNTO or \
+        lookAhead.getType == types.MP_TO or \
+        lookAhead.getType == types.MP_DO or \
+        lookAhead.getType == types.MP_UNTIL or \
+        lookAhead.getType == types.MP_ELSE or \
+        lookAhead.getType == types.MP_THEN or \
+        lookAhead.getType == types.MP_SCOLON or \
+        lookAhead.getType == types.MP_END:
             Lambda()
-    elif lookAhead.getType == MP_NEQUAL or \
-        lookAhead.getType == MP_GEQUAL or \
-        lookAhead.getType == MP_LEQUAL or \
-        lookAhead.getType == MP_GTHAN or \
-        lookAhead.getType == MP_LTHAN or \
-        lookAhead.getType == MP_EQUAL:
+    elif lookAhead.getType == types.MP_NEQUAL or \
+        lookAhead.getType == types.MP_GEQUAL or \
+        lookAhead.getType == types.MP_LEQUAL or \
+        lookAhead.getType == types.MP_GTHAN or \
+        lookAhead.getType == types.MP_LTHAN or \
+        lookAhead.getType == types.MP_EQUAL:
             op = relationalOperator()
-            right = simpleExpression(null)
-            # sem analyzer stuff, create record
+            right = simpleExpression(None)
+            Analyzer.genOptRelPart(left, op, right)
+            opt = {'type':recTypes.LITERAL, 'varType':varTypes.BOOLEAN}
     else:
         syntaxError("',', ), downto, to, do, until, else, then, ;, end, <>, >=, <=, >, <, =")
-    # return sem record
+    return opt
 """
 Rule 76, 77, 78, 79, 80 and 81:
 RelationalOperator -> "="
@@ -955,47 +959,48 @@ RelationalOperator -> "="
                    -> "<>"
 """
 def relationalOperator():
+    relOp = {}
     if lookAhead.getType == types.MP_EQUAL:
         match(types.MP_EQUAL)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_NEQUAL}
     elif lookAhead.getType == types.MP_NEQUAL:
         match(types.MP_NEQUAL)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_GEQUAL}
     elif lookAhead.getType == types.MP_GEQUAL:
         match(types.MP_GEQUAL)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_LEQUAL}
     elif lookAhead.getType == types.MP_LEQUAL:
         match(types.MP_LEQUAL)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_GTHAN}
     elif lookAhead.getType == types.MP_GTHAN:
         match(types.MP_GTHAN)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_LTHAN}
     elif lookAhead.getType == types.MP_LTHAN:
         match(types.MP_LTHAN)
-        # new semantic record
+        relOp = {'type':recTypes.REL_OP, 'token':types.MP_EQUAL}
     else:
         syntaxError("<>, >=, <= , >, <, =")
-    # return semantic record
+    return relOp
 """
 Rule 82:
 SimpleExpression -> OptionalSign Term TermTail
 """
 def simpleExpression(formalParam):
-    if lookAhead.getType == MP_IDENTIFIER or \
-        lookAhead.getType == MP_FALSE or \
-        lookAhead.getType == MP_TRUE or \
-        lookAhead.getType == MP_STRING_LIT or \
-        lookAhead.getType == MP_FLOAT_LIT or \
-        lookAhead.getType == MP_LPAREN or \
-        lookAhead.getType == MP_NOT or \
-        lookAhead.getType == MP_INTEGER_LIT or \
-        lookAhead.getType == MP_MINUS or \
-        lookAhead.getType == MP_PLUS:
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
             opt = optionalSign()
             term = term(formalParam)
             # sem analyzer stuff
             termTail = termTail(term)
-            if !termTail:
+            if not termTail:
                 termTail = term
             simpExpr = termTail
     else:
@@ -1007,31 +1012,31 @@ TermTail -> AddingOperator Term TermTail
          -> Lambda
 """
 def termTail(left):
-    if lookAhead.getType == MP_COMMA or \
-        lookAhead.getType == MP_RPAREN or \
-        lookAhead.getType == MP_NEQUAL or \
-        lookAhead.getType == MP_GEQUAL or \
-        lookAhead.getType == MP_LEQUAL or \
-        lookAhead.getType == MP_GTHAN or \
-        lookAhead.getType == MP_LTHAN or \
-        lookAhead.getType == MP_EQUAL or \
-        lookAhead.getType == MP_DOWNTO or \
-        lookAhead.getType == MP_TO or \
-        lookAhead.getType == MP_DO or \
-        lookAhead.getType == MP_UNTIL or \
-        lookAhead.getType == MP_ELSE or \
-        lookAhead.getType == MP_THEN or \
-        lookAhead.getType == MP_SCOLON or \
-        lookAhead.getType == MP_END:
+    if lookAhead.getType == types.MP_COMMA or \
+        lookAhead.getType == types.MP_RPAREN or \
+        lookAhead.getType == types.MP_NEQUAL or \
+        lookAhead.getType == types.MP_GEQUAL or \
+        lookAhead.getType == types.MP_LEQUAL or \
+        lookAhead.getType == types.MP_GTHAN or \
+        lookAhead.getType == types.MP_LTHAN or \
+        lookAhead.getType == types.MP_EQUAL or \
+        lookAhead.getType == types.MP_DOWNTO or \
+        lookAhead.getType == types.MP_TO or \
+        lookAhead.getType == types.MP_DO or \
+        lookAhead.getType == types.MP_UNTIL or \
+        lookAhead.getType == types.MP_ELSE or \
+        lookAhead.getType == types.MP_THEN or \
+        lookAhead.getType == types.MP_SCOLON or \
+        lookAhead.getType == types.MP_END:
             Lambda()
-    elif lookAhead.getType == MP_OR or \
-        lookAhead.getType == MP_MINUS or \
-        lookAhead.getType == MP_PLUS:
+    elif lookAhead.getType == types.MP_OR or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
             addOp = addingOperator()
-            term = term(null)
+            term = term(None)
             # sem analyzer stuff
             termTail = termTail(term)
-            if !termTail:
+            if not termTail:
                 termTail = term
     else:
         syntaxError("',', ), <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, or, -, +")
@@ -1169,9 +1174,20 @@ def booleanExpression():
 Rule 112:
 OrdinalExpression -> Expression
 """
-def ordinalExpression():
-    expression()
-
+def ordinalExpression(formalParam):
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS:
+            ordRec = expression(formalParam)
+    else:
+        syntaxError("ordinalExp")
 """
 Rule 113:
 IdentifierList -> Identifier IdentifierTail
