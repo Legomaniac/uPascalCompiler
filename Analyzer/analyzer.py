@@ -401,11 +401,11 @@ class Analyzer:
             arrayRec[1] = left
             arrayRec[2] = right
         elif leftType == varTypes.INTEGER and rightType == varTypes.FLOAT:
+            ##### Fix dis #####
             self.genSUB()
-            #Fix dis
             self.genCASTSF()
+            ##### Fix dis #####
             self.genADD()
-            #Fix dis
             arrayRec[0] = {'type':recTypes.LITERAL, 'varType':varTypes.MP_FLOAT}
             arrayRec[1] = right
         elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
@@ -416,6 +416,23 @@ class Analyzer:
             self.semanticError("Invalid casting from " + rightType + " to " + leftType)
             return None
         return arrayRec
+
+    def genMulOp(self, left, mulOp, right):
+        results = []
+        op = mulOp['token']
+        if op == tokenTypes.MP_DIV_INT:
+            checkTypesInt(left, right)
+            self.genDIVS()
+            resultType = varTypes.INTEGER
+        elif op == tokenTypes.MP_DIV:
+            results = genCastDivision(left, right)
+            resultType = self.getSemRecType(results[0])
+            self.genDIVSF()
+        else:
+            results = genCast(left, right)
+            resultType = self.getSemRecType(results[0])
+
+            ######## Left off here #########
 
     def genForController(self, controlRec, forDir):
         inc = False

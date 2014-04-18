@@ -997,12 +997,12 @@ def simpleExpression(formalParam):
         lookAhead.getType == types.MP_MINUS or \
         lookAhead.getType == types.MP_PLUS:
             opt = optionalSign()
-            term = term(formalParam)
+            thisTerm = term(formalParam)
             # sem analyzer stuff
-            termTail = termTail(term)
-            if not termTail:
-                termTail = term
-            simpExpr = termTail
+            thisTermTail = termTail(thisTerm)
+            if not thisTermTail:
+                thisTermTail = thisTerm
+            simpExpr = thisTermTail
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
     return simpExpr
@@ -1033,11 +1033,11 @@ def termTail(left):
         lookAhead.getType == types.MP_MINUS or \
         lookAhead.getType == types.MP_PLUS:
             addOp = addingOperator()
-            term = term(None)
-            # sem analyzer stuff
-            termTail = termTail(term)
-            if not termTail:
-                termTail = term
+            thisTerm = term(None)
+            Analyzer.genAddOp(left, addOp, thisTerm)
+            thisTermTail = termTail(thisTerm)
+            if not thisTermTail:
+                thisTermTail = thisTerm
     else:
         syntaxError("',', ), <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, or, -, +")
     return termTail
@@ -1073,18 +1073,73 @@ def addingOperator():
 Rule 91:
 Term -> Factor FactorTail
 """
-def term():
-    factor()
-    factorTail()
+def term(formalParam):
+    thisFactor = {}
+    thisFactorTail = {}
+    thisTerm = None
+
+    if lookAhead.getType == types.MP_IDENTIFIER or \
+        lookAhead.getType == types.MP_FALSE or \
+        lookAhead.getType == types.MP_TRUE or \
+        lookAhead.getType == types.MP_STRING_LIT or \
+        lookAhead.getType == types.MP_FLOAT_LIT or \
+        lookAhead.getType == types.MP_LPAREN or \
+        lookAhead.getType == types.MP_NOT or \
+        lookAhead.getType == types.MP_INTEGER_LIT:
+            thisFactor = factor(formalParam)
+            thisFactorTail = factorTail(thisFactor)
+            if thisFactorTail is None:
+                thisFactorTail = thisFactor
+            thisTerm = thisFactorTail
+    else:
+        syntaxError("identifier, false, true, String, Float, (, not, Integer")
+    return thisTerm
+
 """
 Rule 92 and 93:
 FactorTail -> MultiplyingOperator Factor FactorTail
            -> Lambda
 """
-def factorTail():
-    multiplyingOperator()
-    factor()
-    factortail()
+def factorTail(left):
+    thisMulOp = {}
+    thisFactor = {}
+    thisFactorTail = None
+
+    if lookAhead.getType == types.MP_COMMA or \
+        lookAhead.getType == types.MP_RPAREN or \
+        lookAhead.getType == types.MP_OR or \
+        lookAhead.getType == types.MP_MINUS or \
+        lookAhead.getType == types.MP_PLUS or \
+        lookAhead.getType == types.MP_NEQUAL or \
+        lookAhead.getType == types.MP_GEQUAL or \
+        lookAhead.getType == types.MP_LEQUAL or \
+        lookAhead.getType == types.MP_GTHAN or \
+        lookAhead.getType == types.MP_LTHAN or \
+        lookAhead.getType == types.MP_EQUAL or \
+        lookAhead.getType == types.MP_DOWNTO or \
+        lookAhead.getType == types.MP_TO or \
+        lookAhead.getType == types.MP_DO or \
+        lookAhead.getType == types.MP_UNTIL or \
+        lookAhead.getType == types.MP_ELSE or \
+        lookAhead.getType == types.MP_THEN or \
+        lookAhead.getType == types.MP_SCOLON or \
+        lookAhead.getType == types.MP_END:
+            Lambda()
+    elif lookAhead.getType == types.MP_AND or \
+        lookAhead.getType == types.MP_MOD or \
+        lookAhead.getType == types.MP_DIV or \
+        lookAhead.getType == types.MP_DIV_INT or \
+        lookAhead.getType == types.MP_TIMES:
+            thisMulOp = multiplyingOperator()
+            thisFactor = factor(None)
+            thisFactor = Analyzer.genMulOp(left, thisMulOp, thisFactor)
+            thisFactorTail = factorTail(thisFactor)
+            if thisFactorTail is None:
+                thisFactorTail = thisFactor
+    else:
+        syntaxError("',', ), or, -, +, <>, >=, <=, >, <, =, downto, to, do, until, else, then, ;, end, and, mod, div, / , *")
+    return thisFactorTail
+
 """
 Rule 94, 95, 96, 97 and 98:
 MultiplyingOperator -> "*"
@@ -1094,16 +1149,25 @@ MultiplyingOperator -> "*"
                     -> "and"
 """
 def multiplyingOperator():
-    if match(types.MP_TIMES):
-        pass
-    elif match(types.MP_FLOAT_DIVIDE):
-        pass
-    elif match(types.MP_DIV):
-        pass
-    elif match(types.MP_MOD):
-        pass
-    elif match(types.MP_AND):
-        pass
+    thisMulOp = None
+    if lookAhead.getType == types.MP_TIMES:
+        match(types.MP_TIMES)
+        thisMulOp = {'type':recTypes.MUL_OP, 'token':types.MP_TIMES}
+    elif lookAhead.getType == types.MP_DIV:
+        match(types.MP_DIV)
+        thisMulOp = {'type':recTypes.MUL_OP, 'token':types.MP_DIV}
+    elif lookAhead.getType == types.MP_DIV_INT:
+        match(types.MP_DIV_INT)
+        thisMulOp = {'type':recTypes.MUL_OP, 'token':types.MP_DIV_INT}
+    elif lookAhead.getType == types.MP_MOD:
+        match(types.MP_MOD)
+        thisMulOp = {'type':recTypes.MUL_OP, 'token':types.MP_MOD}
+    elif lookAhead.getType == types.MP_AND:
+        match(types.MP_AND)
+        thisMulOp = {'type':recTypes.MUL_OP, 'token':types.MP_AND}
+    else:
+        syntaxError("and, mod, div, / , *")
+    return thisMulOp
 """
 Rule 99, 100, 101, 102, 103, 104, 105 and 106:
 Factor -> UnsignedInteger
