@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import scanner as scanner
-from tokens import *
 import sys
+from Parser import parser as parser
 
 """
 microPascal compiler implemented in Python
@@ -9,20 +8,14 @@ This is the main driver for the program
 """
 
 def main():
-    print "We have started the compiler"
+    print "############# Starting run of Compyler #############"
     fname = sys.argv[1]
-    sourceText = open(str(fname)).read()
-    writeln("Here are the tokens returned by the scanner:")
-    writeln("Token Line Col Lexeme")
-    scanner.initialize(sourceText)
-    while True:
-        token = scanner.getToken()
-        if token is None:
-            print "Exception thrown! Quitting now..."
-            break
-        writeln(token.show())
-        if token.type == EPSILON: break
-                
+    if fname.__len__() > 0:
+        sourceText = open(str(fname)).read()
+        parser.parse(sourceText)
+    else:
+        print "User Input Error: This program requires a filepath parameter..."
+
 def writeln(*args):
     for arg in args:
         print str(arg)
