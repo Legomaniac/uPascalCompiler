@@ -27,19 +27,12 @@ def getToken():
     lookAhead = lookAhead2
     lookAhead2 = scanner.getToken()
 
-def semError(msg):
-    sys.exit("Semantic Error: " + str(msg))
-
 def matchError(expToken):
-    print "Match error found on line: " + lookAhead.getLineNumber() + ", column: "
-        + lookAhead.getColumnNumber() + ":: expected '" + expToken
-        + "', instead found '" + lookAhead.getLexeme() + "'"
+    print "Match error found on line: " + lookAhead.getLineNumber() + ", column: " + lookAhead.getColumnNumber() + ":: expected '" + expToken + "', instead found '" + lookAhead.getLexeme() + "'"
 
 def syntaxError(expToken):
-    sys.exit("Syntax error found on line: " + lookAhead.getLineNumber() + ", column: "
-        + lookAhead.getColumnNumber() + ":: expected '" + expToken
-        + "', instead found '" + lookAhead.getLexeme() + "'")
-    
+    sys.exit("Syntax error found on line: " + lookAhead.getLineNumber() + ", column: " + lookAhead.getColumnNumber() + ":: expected '" + expToken + "', instead found '" + lookAhead.getLexeme() + "'")
+
 def semanticError(msg):
     sys.exit("Semantic Error: " + str(msg))
 
@@ -294,7 +287,7 @@ def procedureHeading(branchLbl):
         procID = procedureIdentifier()
         parameters = optionalFormalParameterList()
         for p in parameters:
-            attributes.append(p['attribute']) ####????????
+            attributes.append(p['attribute'])
             ids.append(p['lexeme'])
         symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
         addSymbolTable(procID, branchLbl['type'])
