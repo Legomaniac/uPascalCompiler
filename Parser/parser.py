@@ -23,17 +23,8 @@ def dq(s): return '"%s"' %s
 # --------------------------------------------------------------
 # Parser Functions
 # --------------------------------------------------------------
-def parse(sourceText):
-    global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
-    scanner.initialize(sourceText)
-    lookAhead = getToken()
-    lookAhead2 = getToken()
-    symbolTables = []
-    analyzer = Analyzer(symbolTables)
-    systemGoal()
-
 def getToken():
-	lookAhead = lookAhead2
+    lookAhead = lookAhead2
     lookAhead2 = scanner.getToken()
 
 def semError(msg):
@@ -61,6 +52,15 @@ def match(tempTokenType):
 def Lambda():
     #Dummy function to extend lambda rules
     #print "Extending lambda rule."
+
+def parse(sourceText):
+    global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
+    scanner.initialize(sourceText)
+    lookAhead = getToken()
+    lookAhead2 = getToken()
+    symbolTables = []
+    analyzer = Analyzer(symbolTables)
+    systemGoal()
 # --------------------------------------------------------------
 # Symbol Table Stack Stuff
 # --------------------------------------------------------------
