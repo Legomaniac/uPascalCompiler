@@ -31,10 +31,10 @@ def getToken():
     lookAhead2 = scanner.getToken()
 
 def matchError(expToken):
-    print "Match error found on line: " + lookAhead.getLineNumber() + ", column: " + lookAhead.getColumnNumber() + ":: expected '" + expToken + "', instead found '" + lookAhead.getLexeme() + "'"
+    print "Match error found on line: " + str(lookAhead.getLineNumber()) + ", column: " + str(lookAhead.getColNumber()) + "... Expected '" + str(expToken) + "', instead found '" + str(lookAhead.getLexeme()) + "'"
 
 def syntaxError(expToken):
-    sys.exit("Syntax error found on line: " + lookAhead.getLineNumber() + ", column: " + lookAhead.getColumnNumber() + ":: expected '" + expToken + "', instead found '" + lookAhead.getLexeme() + "'")
+    sys.exit("Syntax error found on line: " + str(lookAhead.getLineNumber()) + ", column: " + str(lookAhead.getColNumber()) + "... Expected '" + str(expToken) + "', instead found '" + str(lookAhead.getLexeme()) + "'")
 
 def semanticError(msg):
     sys.exit("Semantic Error: " + str(msg))
@@ -53,8 +53,8 @@ def Lambda():
 def parse(sourceText):
     global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
     scanner.initialize(sourceText)
-    lookAhead = getToken()
-    lookAhead2 = getToken()
+    lookAhead = scanner.getToken()
+    lookAhead2 = scanner.getToken()
     symbolTables = []
     analyzer = Analyzer(symbolTables)
     systemGoal()

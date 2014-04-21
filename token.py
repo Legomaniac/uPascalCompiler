@@ -8,7 +8,7 @@ class Token:
         self.sourceText = startChar.sourceText
         self.lineIndex = startChar.lineIndex
         self.colIndex = startChar.colIndex
-        self.type = None
+        self.Type = None
 
 
     def show(self):
@@ -31,9 +31,9 @@ class Token:
             + "^\n\n" + msg)
 
     def getType(self):
-        return self.type
+        return self.Type
 
-    def getLexme(self):
+    def getLexeme(self):
         return self.lexeme
 
     def getLineNumber(self):
