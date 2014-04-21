@@ -619,6 +619,7 @@ class Analyzer:
                     self.genNEGS()
                 elif op == tokenTypes.MP_PLUS:
                     # do not throw sem error, but do nothing
+                    pass
                 else:
                     self.semanticError(opSign + " is not a neg op for type: " + termType)
             elif termType == varTypes.FLOAT:
@@ -626,6 +627,7 @@ class Analyzer:
                     self.genNEGSF()
                 elif op == tokenTypes.MP_PLUS:
                     # do not throw sem error, but do nothing
+                    pass
                 else:
                     self.semanticError(opSign + " is not a neg op for type: " + termType)
             else:

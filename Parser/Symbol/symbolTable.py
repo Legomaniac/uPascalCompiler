@@ -1,7 +1,7 @@
 #symbolTable.py
 import sys
 sys.path.insert(0, '../')
-from classifications import classification
+from Parser.classifications import classification
 
 class SymbolTable:
     scopeName = None

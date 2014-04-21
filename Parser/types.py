@@ -7,8 +7,8 @@ class Enum(set):
 
 #All the different variable types in microPascal
 varTypes = Enum([
-    INTEGER,
-    FLOAT,
-    BOOLEAN,
-    STRING
+    "INTEGER",
+    "FLOAT",
+    "BOOLEAN",
+    "STRING"
     ])

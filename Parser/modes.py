@@ -7,6 +7,6 @@ class Enum(set):
 
 #All the different modes in microPascal
 mode = Enum([
-    VALUE,
-    VARIABLE
+    "VALUE",
+    "VARIABLE"
     ])

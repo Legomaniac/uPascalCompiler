@@ -7,10 +7,10 @@ class Enum(set):
 
 #All the different classification types in microPascal
 classification = Enum([
-    VARIABLE,
-    PARAMETER,
-    FUNCTION,
-    PROCEDURE,
-    DISREG,
-    RETADDR
+    "VARIABLE",
+    "PARAMETER",
+    "FUNCTION",
+    "PROCEDURE",
+    "DISREG",
+    "RETADDR"
     ])
