@@ -13,9 +13,11 @@ from tokens import *
 import scanner as scanner
 
 # Use 2 look aheads for parsing
-labelCounter = 1
 lookAhead = None
 lookAhead2 = None
+
+
+labelCounter = 1
 indent = 0
 symbolTables = []
 
@@ -24,6 +26,7 @@ def dq(s): return '"%s"' %s
 # Parser Functions
 # --------------------------------------------------------------
 def getToken():
+    global lookAhead, lookAhead2
     lookAhead = lookAhead2
     lookAhead2 = scanner.getToken()
 
@@ -43,8 +46,9 @@ def match(tempTokenType):
         matchError(str(tempTokenType))
 
 def Lambda():
-    #Dummy function to extend lambda rules
-    #print "Extending lambda rule."
+    pass
+    ## Dummy function to extend lambda rules
+    ## print "Extending lambda rule."
 
 def parse(sourceText):
     global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
@@ -105,7 +109,7 @@ Program -> ProgramHeading ";" Block "."
 def program():
     if lookAhead.getType() == types.MP_PROGRAM:
         scopeName = programHeading()
-        branch = getBranch()
+        branch = getNextLabel()
         record = {'type':recTypes.LABEL, 'label':branch}
         addSymbolTable(scopeName, branch)
         symbolTables[-1].addDataSymbolsToTable(classification.DISREG, 'Old Display Register Value', {'type':Type.STRING, 'mode':mode.VALUE})
@@ -245,7 +249,7 @@ def procedureDeclaration():
         match(types.MP_SCOLON)
         block(procedureID, {'type':recTypes.BLOCK, 'label':"procedure"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':''+symbolTables[-1].getScopeName(), 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
         analyzer.genProcDR(nameRecord)
         print "Popping Procedure Table..."
         printSymbolTables()
@@ -264,7 +268,7 @@ def functionDeclaration():
         match(types.MP_SCOLON)
         block(functionID, {'type':recTypes.BLOCK, 'label':"function"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':+symbolTables[-1].getScopeName(), 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
         analyzer.genFuncDR(nameRecord)
         print "Popping Function Table..."
         printSymbolTables()
@@ -305,6 +309,7 @@ def functionHeading():
     funcID = None
     attributes = []
     ids = []
+    branchLbl = {'type':recTypes.LABEL, 'label':"lbl"}
     if lookAhead.getType() == types.MP_FUNCTION:
         match(types.MP_FUNCTION)
         funcID = functionIdentifier()
@@ -315,7 +320,7 @@ def functionHeading():
         match(types.MP_COLON)
         t = Type()
         symbolTables[-1].addModuleSymbolsToTable(classification.FUNCTION, funcID, t, attributes, branchLbl)
-        addSymbolTable(procID, branchLbl['type'])
+        addSymbolTable(funcID, branchLbl['type'])
         symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", {'type':varTypes.STRING, 'mode':mode.VALUE})
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
         symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", {'type':varTypes.STRING, 'mode':mode.VALUE})
@@ -376,9 +381,9 @@ def valueParameterSection():
     if lookAhead.getType() == types.MP_IDENTIFIER:
         ids = identifierList()
         match(types.MP_COLON)
-        Type = Type()
+        thisType = Type()
         for lex in ids:
-            parameters.append({'lexeme':lex, 'attribute':{'type':Type, 'mode':mode.VALUE}})
+            parameters.append({'lexeme':lex, 'attribute':{'type':thisType, 'mode':mode.VALUE}})
     else:
         syntaxError("identifier")
     return parameters
@@ -392,9 +397,9 @@ def variableParameterSection():
         match(types.MP_VAR)
         ids = identifierList()
         match(types.MP_COLON)
-        Type = Type()
+        thisType = Type()
         for lex in ids:
-            parameters.append({'lexeme':lex, 'attribute':{'type':Type, 'mode':mode.VARIABLE}})
+            parameters.append({'lexeme':lex, 'attribute':{'type':thisType, 'mode':mode.VARIABLE}})
     else:
         syntaxError("var")
     return parameters
@@ -1336,7 +1341,7 @@ def booleanExpression():
                 rowData = analyzer.findSymbol(semRec['lexeme'], semRec['classification'])
                 varType = rowData['type']
                 if varType != varTypes.BOOLEAN:
-                    semanticError("BooleanExpression requires a bool identifier type, but found: " + str(semRec['lexeme']) + " with type: " + str(varType)
+                    semanticError("BooleanExpression requires a bool identifier type, but found: " + str(semRec['lexeme']) + " with type: " + str(varType))
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
 """
