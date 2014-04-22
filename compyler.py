@@ -10,11 +10,10 @@ This is the main driver for the program
 def main():
     print "############# Starting run of Compyler #############"
     if len(sys.argv) > 1:
-        print len(sys.argv)
         fname = sys.argv[1]
         sourceText = open(str(fname)).read()
         parser.parse(sourceText)
-        print "Completed run of Compiler."
+        print "############# Completed run of Compiler #############"
     else:
         print "User Input Error: This program requires a filepath parameter..."
 
