@@ -9,10 +9,12 @@ This is the main driver for the program
 
 def main():
     print "############# Starting run of Compyler #############"
-    fname = sys.argv[1]
-    if fname.__len__() > 0:
+    if len(sys.argv) > 1:
+        print len(sys.argv)
+        fname = sys.argv[1]
         sourceText = open(str(fname)).read()
         parser.parse(sourceText)
+        print "Completed run of Compiler."
     else:
         print "User Input Error: This program requires a filepath parameter..."
 
@@ -22,4 +24,3 @@ def writeln(*args):
 
 if __name__ == "__main__":
     main()
-    print "Completed run of Compiler."

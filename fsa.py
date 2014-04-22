@@ -10,7 +10,7 @@ class ScanError(Exception): pass
 def process_whitespace():
     while char1 in WHITESPACE_CHARS:
         token = Token(character)
-        token.type = types.MP_WHITESPACE
+        token.Type = types.MP_WHITESPACE
         getChar() 
 
         while char1 in WHITESPACE_CHARS:
@@ -21,7 +21,7 @@ def process_whitespace():
     while char2 == "/*":
         # comment start
         token = Token(character)
-        token.type = types.MP_COMMENT
+        token.Type = types.MP_COMMENT
         token.lexeme = char2
 
         getChar()
@@ -39,18 +39,18 @@ def process_whitespace():
         getChar()
 
 def identifier_fsa(token):
-    token.type = types.MP_IDENTIFIER
+    token.Type = types.MP_IDENTIFIER
     getChar() 
 
     while char1 in IDENTIFIER_CHARS:
         token.lexeme += char1
         getChar() 
 
-    if token.lexeme in ReservedWords: token.type = ReservedWords[token.lexeme]
+    if token.lexeme in ReservedWords: token.Type = ReservedWords[token.lexeme]
     return token
 
 def numbers_fsa(token):
-    token.type = types.MP_INTEGER_LIT
+    token.Type = types.MP_INTEGER_LIT
     getChar()
 
     while char1 in INTEGER:
@@ -59,7 +59,7 @@ def numbers_fsa(token):
 
     if char1 == ".":
         token.lexeme += char1
-        token.type = types.MP_FIXED_LIT
+        token.Type = types.MP_FIXED_LIT
         getChar()
         while char1 in INTEGER:
             token.lexeme += char1
@@ -69,7 +69,7 @@ def numbers_fsa(token):
         token.lexeme += char1
         getChar()
         token.lexeme += char1
-        token.type = types.MP_FLOAT_LIT
+        token.Type = types.MP_FLOAT_LIT
         getChar()
         while char1 in INTEGER:
             token.lexeme += char1
@@ -91,15 +91,15 @@ def string_fsa(token):
 
     token.lexeme += char1
     getChar()         
-    token.type = types.MP_STRING_LIT
+    token.Type = types.MP_STRING_LIT
     return token
 
 def symbols_fsa(token):
-    token.type = SingleCharacterSymbols[token.lexeme]
+    token.Type = SingleCharacterSymbols[token.lexeme]
     getChar()
     if char1 in ["=", ">"]:
         token.lexeme += char1
-        token.type = SingleCharacterSymbols[token.lexeme]
+        token.Type = SingleCharacterSymbols[token.lexeme]
         getChar()
 
     return token

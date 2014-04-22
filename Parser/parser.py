@@ -17,8 +17,7 @@ lookAhead = None
 lookAhead2 = None
 
 
-labelCounter = 1
-indent = 0
+labelCounter = 0
 symbolTables = []
 
 def dq(s): return '"%s"' %s
@@ -40,7 +39,7 @@ def semanticError(msg):
     sys.exit("Semantic Error: " + str(msg))
 
 def match(tempTokenType):
-    if lookAhead.type == tempTokenType:
+    if lookAhead.Type == tempTokenType:
         getToken()
     else:
         matchError(str(tempTokenType))
@@ -51,8 +50,9 @@ def Lambda():
     ## print "Extending lambda rule."
 
 def parse(sourceText):
-    global scanner, lookAhead, lookAhead2, labelCounter, symbolTables, analyzer
+    global scanner, labelCounter, lookAhead, lookAhead2, symbolTables, analyzer
     scanner.initialize(sourceText)
+    labelCounter = 1
     lookAhead = scanner.getToken()
     lookAhead2 = scanner.getToken()
     symbolTables = []
@@ -62,6 +62,7 @@ def parse(sourceText):
 # Symbol Table Stack Stuff
 # --------------------------------------------------------------
 def getNextLabel():
+    global labelCounter
     label = "L" + str(labelCounter)
     labelCounter += 1
     return label
@@ -112,7 +113,7 @@ def program():
         branch = getNextLabel()
         record = {'type':recTypes.LABEL, 'label':branch}
         addSymbolTable(scopeName, branch)
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, 'Old Display Register Value', {'type':Type.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, 'Old Display Register Value', [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         match(types.MP_SCOLON)
         analyzer.genBR(record)
         block(scopeName, {'type':recTypes.BLOCK, 'label':'program'}, record)
@@ -194,7 +195,7 @@ def variableDeclaration():
         idList = identifierList()
         match(types.MP_COLON)
         t = Type()
-        symbolTables[-1].addDataSymbolsToTable(classification.VARIABLE, idList, {'type':t, 'mode':None})
+        symbolTables[-1].addDataSymbolsToTable(classification.VARIABLE, idList, [{'type':t, 'mode':None}])
     else:
         syntaxError("identifier")
 """
@@ -295,9 +296,9 @@ def procedureHeading(branchLbl):
             ids.append(p['lexeme'])
         symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
         addSymbolTable(procID, branchLbl['type'])
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
-        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
     else:
         syntaxError("procedure")
     return procID
@@ -321,9 +322,9 @@ def functionHeading():
         t = Type()
         symbolTables[-1].addModuleSymbolsToTable(classification.FUNCTION, funcID, t, attributes, branchLbl)
         addSymbolTable(funcID, branchLbl['type'])
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
-        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", {'type':varTypes.STRING, 'mode':mode.VALUE})
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
     else:
         syntaxError("function")
     return funcID

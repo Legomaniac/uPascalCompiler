@@ -81,14 +81,14 @@ class SymbolTable:
         return None
     
     def addDataSymbolsToTable(self, c, ids, attributes):
-        if len(attributes) == 1:
-            attribute = attributes
-            attributes = []
-            for i in ids:
-                attributes.append(attribute)
+        att = 0
         for i in ids:
-            lex = ids[i]
-            attribute = attributes[i]
+            if len(attributes) == 1:
+                attribute = []
+                attribute = attribute.append(attributes)
+            else:
+                attribute = attributes[att]
+            lex = i
             if c == classification.VARIABLE:
                 row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':self.getAndIncrementTableSize(), 'mode':attribute['mode']}
                 self.insertNewRow(row)
@@ -101,7 +101,8 @@ class SymbolTable:
                 row = {'lexeme':lex,'classification':c,'type':attribute['type'],'offset':self.getAndIncrementTableSize(), 'mode':attribute['mode']}
                 self.insertNewRow(row)
             else:
-                continue      
+                continue
+            att += 1
 
     def addModuleSymbolsToTable(self, c, lex, Type, attributes, branch):
         if c == classification.FUNCTION:
