@@ -113,7 +113,7 @@ def program():
         branch = getNextLabel()
         record = {'type':recTypes.LABEL, 'label':branch}
         addSymbolTable(scopeName, branch)
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, 'Old Display Register Value', [{'type':varTypes.STRING, 'mode':mode.VALUE}])
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         match(types.MP_SCOLON)
         analyzer.genBR(record)
         block(scopeName, {'type':recTypes.BLOCK, 'label':'program'}, record)
@@ -296,9 +296,9 @@ def procedureHeading(branchLbl):
             ids.append(p['lexeme'])
         symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
         addSymbolTable(procID, branchLbl['type'])
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
-        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, ["Caller's Return Address"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
     else:
         syntaxError("procedure")
     return procID
@@ -322,9 +322,9 @@ def functionHeading():
         t = Type()
         symbolTables[-1].addModuleSymbolsToTable(classification.FUNCTION, funcID, t, attributes, branchLbl)
         addSymbolTable(funcID, branchLbl['type'])
-        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, "Old Display Register Value", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
+        symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
-        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, "Caller's Return Address", [{'type':varTypes.STRING, 'mode':mode.VALUE}])
+        symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, ["Caller's Return Address"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
     else:
         syntaxError("function")
     return funcID
