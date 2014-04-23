@@ -146,7 +146,7 @@ def block(scope, blockType, label):
         lookAhead.getType() == types.MP_PROCEDURE or \
         lookAhead.getType() == types.MP_VAR:
             variableDeclarationPart()
-            nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+            nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
             procedureAndFunctionDeclarationPart()
             analyzer.genSpecLabel(label)
             analyzer.genActRec(nameRecord, blockType)

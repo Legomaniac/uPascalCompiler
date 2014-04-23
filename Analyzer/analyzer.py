@@ -25,14 +25,15 @@ class Analyzer:
     """
     def findSymbolTable(self, element):
         tables = symbolTables.reverse()
-        for table in tables:
-            st = tables[table]
-            if st.contains(element):
-                return st
-            elif st.getScopeName() == element:
-                return st
-            else:
-                continue
+        if tables is not None:
+            for table in tables:
+                st = tables[table]
+                if st.contains(element):
+                    return st
+                elif st.getScopeName() == element:
+                    return st
+                else:
+                    continue
         return None
     """
     Calls one of two findSymbol functions on the table depending on
@@ -254,7 +255,7 @@ class Analyzer:
     
     def genBR(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            o.writeln("BR " + nameRec['label'])
+            o.write("BR " + nameRec['label'])
         else:
             self.semanticError("Called genBR with type other than LABEL")
     
@@ -276,7 +277,7 @@ class Analyzer:
     def genActRec(self, nameRec, blockType):
         if blockType['type'] == recTypes.BLOCK:
             block = blockType['label']
-            table = self.findSymbolTable(nameRec['label'])
+            table = self.findSymbolTable(nameRec['scope'])
             varCount = table.getVarCount()
             parCount = table.getParCount()
             if block == "program":
@@ -858,4 +859,4 @@ class Analyzer:
                 self.semanticError(resultType + " doesn't have relOps")
     
     def genComment(self, comment):
-        o.writeln('\t ' + str(comment))
+        o.write('\t ' + str(comment))
