@@ -1,13 +1,12 @@
 import sys
 sys.path.insert(0, '../')
-from Parser import recordTypes as recTypes
 from tokenTypes import types as tokenTypes
 sys.path.insert(0, '../Parser/')
-from Parser.Symbol import symbolTable
 import parser as parser
 from Parser.classifications import classification
 from Parser.modes import mode
 from Parser.types import varTypes
+from Parser.recordTypes import recTypes
 
 class Analyzer:
     o = None
@@ -344,7 +343,7 @@ class Analyzer:
     Generate Function Call
     """
     def genFuncCall(self, funcRec):
-        row = self.getSemRecIdRow(procRec)
+        row = self.getSemRecIdRow(funcRec)
         label = row['branch']
         self.genCALL(label)
         paramSize = len(row['attributes'])
@@ -540,7 +539,7 @@ class Analyzer:
             return None
         return arrayRec
     
-    def checkTypesInt(left, right):
+    def checkTypesInt(self, left, right):
         leftType = self.getSemRecType(left)
         rightType = self.getSemRecType(right)
         if leftType != varTypes.INTEGER or rightType != varTypes.INTEGER:
@@ -584,7 +583,7 @@ class Analyzer:
         return {'type':recTypes.LITERAL, 'resultType':resultType}
     
     def genAddOp(self, left, addOp, right):
-        results = genCast(left, right)
+        results = self.genCast(left, right)
         resultType = self.getSemRecType(results[0])
         op = addOp['tokenType']
         if resultType == varTypes.INTEGER:
@@ -593,19 +592,19 @@ class Analyzer:
             elif op == tokenTypes.MP_PLUS:
                 self.genADDS()
             else:
-                self.semanticError(opSign + " is not an addOp for type: " + resultType)
+                self.semanticError(op + " is not an addOp for type: " + resultType)
         elif resultType == varTypes.FLOAT:
             if op == tokenTypes.MP_MINUS:
                 self.genSUBSF()
             elif op == tokenTypes.MP_PLUS:
                 self.genADDSF()
             else:
-                self.semanticError(opSign + " is not an addOp for type: " + resultType)
+                self.semanticError(op + " is not an addOp for type: " + resultType)
         elif resultType == varTypes.BOOLEAN:
             if op == tokenTypes.MP_MINUS:
                 self.genORS()
             else:
-                self.semanticError(opSign + " is not an addOp for type: " + resultType)
+                self.semanticError(op + " is not an addOp for type: " + resultType)
         else:
             self.semanticError(resultType + " does not have adding operation")
         return {'type':recTypes.LITERAL, 'resultType':resultType}
@@ -659,7 +658,7 @@ class Analyzer:
     def genNotBool(self, factor):
         factorType = self.getSemRecType(factor)
         if factorType == varTypes.BOOLEAN:
-            genNOTS()
+            self.genNOTS()
         else:
             self.semanticError("Not operator expected, but BOOLEAN found " + factorType)
     
@@ -761,7 +760,7 @@ class Analyzer:
         elif leftRow['classification'] == classification.FUNCTION:
             funcRow = leftRow
             nestingLevel = symTable['nestingLevel']
-            register = 'D' + nameRec['nestingLevel']
+            register = 'D' + idRec['nestingLevel']
             offset = '-1(' + register + ')'
             self.pop(offset)
             funcRow['returnValue'] = True
