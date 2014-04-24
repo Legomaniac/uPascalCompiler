@@ -628,13 +628,13 @@ def assignmentStatement():
         else:
             if assign['classification'] == classification.VARIABLE or assign['classification'] == classification.PARAMETER:
                 varId = variableIdentifier()
-                varRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'varId':varId}
+                varRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'lexeme':varId}
                 match(types.MP_ASSIGN)
                 exp = expression(None)
                 analyzer.genAssign(varRec, exp, symTableRec)
             elif assign['classification'] == classification.FUNCTION:
                 funcID = functionIdentifier()
-                funcRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'varId':funcID}
+                funcRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'lexeme':funcID}
                 match(types.MP_ASSIGN)
                 exp = expression(None)
                 analyzer.genAssign(funcRec, exp, symTableRec)
@@ -1213,7 +1213,7 @@ def factor(formalParam):
         if factorVar is not None:
             if factorVar['classification'] == classification.VARIABLE or factorVar['classification'] == classification.PARAMETER:
                 varId = variableIdentifier()
-                factorRec = {'type':recTypes.IDENTIFIER, 'classification':factorVar['classification'], 'varId':varId}
+                factorRec = {'type':recTypes.IDENTIFIER, 'classification':factorVar['classification'], 'lexeme':varId}
                 if formalParam is not None:
                     formalParamRec = {'type':recTypes.FORMAL_PARAM, 'formalType':formalParam['type'], 'formalMode':formalParam['mode']}
                     factorRec = analyzer.genPushIdWithFormalParam(factorRec, formalParamRec)

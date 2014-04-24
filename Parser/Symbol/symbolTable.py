@@ -56,12 +56,6 @@ class SymbolTable:
     def decrementNestingLevel(self):
         self.nestingLevel -= 1
     
-    def getClassification(self, row):
-        for r in self.tableRows:
-            print r
-            if r == row:
-                return r['classification']
-    
     def contains(self, row):
         for r in self.tableRows:
             if r == row:
@@ -73,12 +67,6 @@ class SymbolTable:
             if r['lexeme'] == row['lexeme']:
                 sys.exit("Identifier (" + row['lexeme'] + ") has already been declared.")
         self.tableRows.append(row)
-        
-    def findSymbol(self, lexeme):
-        for r in self.tableRows:
-            if r['lexeme'] == lexeme:
-                return r
-        return None
     
     def findSymbol(self, lexeme, c):
         for r in self.tableRows:

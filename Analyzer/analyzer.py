@@ -44,11 +44,13 @@ class Analyzer:
         for i in range(len(tables)):
             st = tables[i]
             if c is not None:
-                if st.findSymbol(lex, c):
-                    return st
+                row = st.findSymbol(lex, c)
+                if row is not None:
+                    return row
             else:
-                if st.findSymbol(lex, None):
-                    return st
+                row = st.findSymbol(lex, None)
+                if row is not None:
+                    return row
         return None
     """
     Updates the symbolTables variable from the parser, called from parser
@@ -73,6 +75,9 @@ class Analyzer:
         else:
             self.semanticError("Record type: " + str(rec['type']) + " does not have a type.")
         return t
+    
+    #def getSemRecVarType(self, rec):
+        
     
     def getSemRecIdRow(self, rec):
         lex = rec['lexeme']
@@ -437,12 +442,12 @@ class Analyzer:
         actualParamMode = None
         varClass = False
         if factor['classification'] == classification.VARIABLE:
-            row = self.findSymbol(factor['varId'], classification.VARIABLE)
+            row = self.findSymbol(factor['lexeme'], classification.VARIABLE)
             actualParamType = row['type']
             actualParamMode = row['mode']
             varClass = True
         elif factor['classification'] == classification.PARAMETER:
-            row = self.findSymbol(factor['varId'], classification.PARAMETER)
+            row = self.findSymbol(factor['lexeme'], classification.PARAMETER)
             actualParamType = row['type']
             actualParamMode = row['mode']
             varClass = False
@@ -466,7 +471,7 @@ class Analyzer:
                         self.genPUSH(offset)
             elif formalParamMode == mode.VARIABLE:
                 if actualParamMode == mode.VALUE:
-                    self.semanticError("Cannot send 'mode:value, actual parameter' " + factor['varId'] + " into 'mode: variable, formal param' procedure/function")
+                    self.semanticError("Cannot send 'mode:value, actual parameter' " + factor['lexeme'] + " into 'mode: variable, formal param' procedure/function")
                 elif actualParamMode == mode.VARIABLE:
                     if formalParamType == actualParamType:
                         if varClass:
@@ -639,17 +644,17 @@ class Analyzer:
                 self.semanticError(termType + " does not have a neg operation")
     
     def genPushLit(self, lit, lex):
-        litType = lit['type']
+        litType = lit['varType']
         self.genComment("push lexeme: " + lex + ", type: " + str(litType))
         if litType == varTypes.STRING:
-            self.genPUSH("#\"" + lex + "\"")
+            self.genPUSH("#\"" + str(lex) + "\"")
         elif litType == varTypes.BOOLEAN:
             if lex == "true":
                 self.genPUSH('#1')
             else:
                 self.genPUSH('#0')
         elif litType == varTypes.INTEGER:
-            self.genPUSH('#' + lex)
+            self.genPUSH('#' + str(lex))
         elif litType == varTypes.FLOAT:
             if lex.find("e") > -1 and lex.find(".") == -1:
                 split = lex.find("e") * -1
@@ -657,7 +662,7 @@ class Analyzer:
                 split = split * -1
                 end = str(lex[split:])
                 lex = start + ".0" + end
-            self.genPUSH('#' + lex)
+            self.genPUSH('#' + str(lex))
         else:
             self.semanticError(lex + " of type: " + str(litType) + " cannot be pushed onto the stack")
     
@@ -681,7 +686,7 @@ class Analyzer:
             self.semanticError("Cannot use non-FOR_DIRECTION rec type: " + forDir['type'])
         if controlRec['type'] == recTypes.IDENTIFIER:
             if controlRec['classification'] == classification.VARIABLE:
-                row = self.findSymbol(controlRec['controlId'])
+                row = self.findSymbol(controlRec['controlId'], None)
                 memLocation = self.generateOffset(self.findSymbolTable(row), row)
                 if inc:
                     self.genPUSH(memLocation)
@@ -713,6 +718,8 @@ class Analyzer:
     def genAssignCast(self, leftRec, rightRec):
         leftType = self.getSemRecType(leftRec)
         rightType = self.getSemRecType(rightRec)
+        print "left: " + str(leftRec)
+        print "right: " + str(rightRec)
         returnRec = None
         if leftType == rightType:
             returnRec = rightRec
@@ -748,7 +755,7 @@ class Analyzer:
     def genPushVar(self, varRec):
         if varRec['type'] == recTypes.IDENTIFIER:
             if varRec['classification'] == classification.VARIABLE:
-                row = self.findSymbol(varRec['controlId'])
+                row = self.findSymbol(varRec['controlId'], None)
                 memLocation = self.generateOffset(self.findSymbolTable(row),row)
                 self.genPUSH(memLocation)
             else:
