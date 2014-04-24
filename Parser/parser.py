@@ -76,19 +76,20 @@ def addSymbolTable(scopeName, branchLabel):
     
     if not exists:
         symbolTables.append(SymbolTable(scopeName, branchLabel))
+        analyzer.updateTables(symbolTables)
         return True
     else:
         semanticError("Symbol table with name: " + scopeName + " already exists")
         return False
     
-def removeSymbolTable():
+def removeSymbolTable(rule):
+    symbolTables[-1].decrementNestingLevel()
     symbolTables.pop()
-    SymbolTable.decrementNestingLevel()
+    analyzer.updateTables(symbolTables)
     
 def printSymbolTables():
     for t in symbolTables:
         t.printTable()
-
 #-----------------------------------
 # CFG Definitions
 #-----------------------------------
@@ -118,10 +119,10 @@ def program():
         analyzer.genBR(record)
         block(scopeName, {'type':recTypes.BLOCK, 'label':'program'}, record)
         match(types.MP_PERIOD)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestinglvl':'' + symbolTables[-1].getNestingLevel(), 'tblsize':'' + symbolTables[-1].getTableSize()}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestingLevel':'' + str(symbolTables[-1].getNestingLevel()), 'tblsize':'' + str(symbolTables[-1].getTableSize())}
         analyzer.genProgDR(nameRecord)
         printSymbolTables()
-        removeSymbolTable()
+        removeSymbolTable("program")
         analyzer.genHLT()
     else:
         syntaxError("program")
@@ -250,11 +251,11 @@ def procedureDeclaration():
         match(types.MP_SCOLON)
         block(procedureID, {'type':recTypes.BLOCK, 'label':"procedure"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':''+symbolTables[-1].getScopeName(), 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':''+symbolTables[-1].getScopeName(), 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
         analyzer.genProcDR(nameRecord)
         print "Popping Procedure Table..."
         printSymbolTables()
-        removeSymbolTable()
+        removeSymbolTable("procedure")
     else:
         syntaxError("procedure")
 """
@@ -269,10 +270,10 @@ def functionDeclaration():
         match(types.MP_SCOLON)
         block(functionID, {'type':recTypes.BLOCK, 'label':"function"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':+symbolTables[-1].getScopeName(), 'nestingLevel':''+symbolTables[-1].getNestingLevel(), 'tblsize':''+symbolTables[-1].getTableSize()}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':+symbolTables[-1].getScopeName(), 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
         analyzer.genFuncDR(nameRecord)
         print "Popping Function Table..."
-        printSymbolTables()
+        printSymbolTables("function")
         removeSymbolTable()
         row = analyzer.findSymbol(functionID, classification.FUNCTION)
         if row['returnValue'] is False:
@@ -619,9 +620,9 @@ AssignmentStatement -> VariableIdentifier ":=" Expression
                     -> FunctionIdentifier ":=" Expression
 """
 def assignmentStatement():
-    symTable = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestinglvl':'' + symbolTables[-1].getNestingLevel(), 'tblsize':'' + symbolTables[-1].getTableSize()}
+    symTableRec = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestinglvl':'' + str(symbolTables[-1].getNestingLevel()), 'tblsize':'' + str(symbolTables[-1].getTableSize())}
     if lookAhead.getType() == types.MP_IDENTIFIER:
-        assign = analyzer.findSymbol(lookAhead.getLexeme())
+        assign = analyzer.findSymbol(lookAhead.getLexeme(), None)
         if assign == None:
             semanticError("Undeclared variable: " + lookAhead.getLexeme() + " found.")
         else:
@@ -630,13 +631,13 @@ def assignmentStatement():
                 varRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'varId':varId}
                 match(types.MP_ASSIGN)
                 exp = expression(None)
-                analyzer.genAssign(varRec, exp, symTable)
+                analyzer.genAssign(varRec, exp, symTableRec)
             elif assign['classification'] == classification.FUNCTION:
                 funcID = functionIdentifier()
                 funcRec = {'type':recTypes.IDENTIFIER, 'classification':assign['classification'], 'varId':funcID}
                 match(types.MP_ASSIGN)
                 exp = expression(None)
-                analyzer.genAssign(funcRec, exp, symTable)
+                analyzer.genAssign(funcRec, exp, symTableRec)
             else:
                 semanticError("Cannot assign value to a Procedure")
     else:

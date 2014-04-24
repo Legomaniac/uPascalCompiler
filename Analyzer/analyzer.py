@@ -24,10 +24,10 @@ class Analyzer:
     Can pass either the symbol table name or symbol in the table
     """
     def findSymbolTable(self, element):
-        tables = symbolTables.reverse()
+        tables = symbolTables[::-1]
         if tables is not None:
-            for table in tables:
-                st = tables[table]
+            for i in range(len(tables)):
+                st = tables[i]
                 if st.contains(element):
                     return st
                 elif st.getScopeName() == element:
@@ -37,19 +37,24 @@ class Analyzer:
         return None
     """
     Calls one of two findSymbol functions on the table depending on
-    if the classification is passed or not
+    if the classification is passed or not... calls symbolTable function
     """
     def findSymbol(self, lex, c):
-        tables = symbolTables.reverse()
-        for table in tables:
-            st = tables[table]
+        tables = symbolTables[::-1]
+        for i in range(len(tables)):
+            st = tables[i]
             if c is not None:
                 if st.findSymbol(lex, c):
                     return st
             else:
-                if st.findSymbol(lex):
+                if st.findSymbol(lex, None):
                     return st
         return None
+    """
+    Updates the symbolTables variable from the parser, called from parser
+    """
+    def updateTables(self, tables):
+        symbolTables = tables
     # --------------------------------------------------------------
     # Error Handling
     # --------------------------------------------------------------
@@ -281,21 +286,21 @@ class Analyzer:
             varCount = table.getVarCount()
             parCount = table.getParCount()
             if block == "program":
-                self.genComment(nameRec['label'] + ' start')
+                self.genComment(nameRec['scope'] + ' start')
                 o.write("SP #1 SP") # reserve space for old register value
-                o.write("SP #" + varCount + " SP") # reserve space for variables in program
-                register = 'D' + nameRec['nestinglvl']
-                offset = '-' + (varCount + 1) + '(SP)'
+                o.write("SP #" + str(varCount) + " SP") # reserve space for variables in program
+                register = 'D' + nameRec['nestingLevel']
+                offset = '-' + str(varCount + 1) + '(SP)'
                 self.genMOV(register, offset)
-                self.genSUB("SP", "#" + (varCount + 1), register)
+                self.genSUB("SP", "#" + str(varCount + 1), register)
                 self.genComment("activation end")
             elif block == "procedure" or block == "function":
-                self.genComment(nameRec['label'] + ' start')
-                self.genADD('SP', '#' + varCount, 'SP') # reserve space for variables in program
-                register = 'D' + nameRec['nestinglvl']
-                offset = '-' + (varCount + parCount + 2) + '(SP)' # slot for both return address and old register value
+                self.genComment(nameRec['scope'] + ' start')
+                self.genADD('SP', '#' + str(varCount), 'SP') # reserve space for variables in program
+                register = 'D' + nameRec['nestingLevel']
+                offset = '-' + str(varCount + parCount + 2) + '(SP)' # slot for both return address and old register value
                 self.genMOV(register, offset)
-                self.genSUB("SP", "#" + (varCount + parCount + 2), register)
+                self.genSUB("SP", "#" + str(varCount + parCount + 2), register)
                 self.genComment("activation end")
             else:
                 self.semanticError("Block type: " + block + " is not supported")
@@ -306,14 +311,14 @@ class Analyzer:
     Generate Program Deactivation Record
     """
     def genProgDR(self, nameRec):
-        table = self.findSymbolTable(nameRec['label'])
+        table = self.findSymbolTable(nameRec['scope'])
         varCount = table.getVarCount()
-        register = 'D' + nameRec['nestinglvl']
-        offset = '-' + (varCount + 1) + '(SP)'
+        register = 'D' + nameRec['nestingLevel']
+        offset = '-' + str(varCount + 1) + '(SP)'
         self.genComment('deactivation start')
         self.genMOV(offset, register)
-        self.genSUB('SP', '#' + (varCount + 1), 'SP')
-        self.genComment(nameRec['label'] + ' end')
+        self.genSUB('SP', '#' + str(varCount + 1), 'SP')
+        self.genComment(nameRec['scope'] + ' end')
     
     """
     Generate Procedure Deactivation Record

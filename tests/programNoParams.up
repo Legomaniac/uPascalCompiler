@@ -1,0 +1,16 @@
+program self;
+    var a, b, c : integer;
+    d : float;
+    function doStuff : integer;
+    begin
+        doStuff := c;
+    end;
+begin
+	a := 1;
+	b := 2;
+	c := 3.0;
+	d := 5.77;
+	writeln(a,b,c);
+	a := doStuff;
+	writeln(a,b,c);
+end.

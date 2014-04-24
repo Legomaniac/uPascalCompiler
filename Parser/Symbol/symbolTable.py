@@ -12,12 +12,12 @@ class SymbolTable:
     varCount = 0
     parCount = 0
     
-    def __init__(self, scopeName, branch):
-        scopeName = scopeName
-        branch = branch
-        nestingLevel = self.getAndIncrementNestingLevel()
-        tableRows = self.getAndIncrementTableSize()
-        tableSize = 0
+    def __init__(self, scope, branchLbl):
+        self.scopeName = scope
+        self.branch = branchLbl
+        self.nestingLevel = self.getAndIncrementNestingLevel()
+        self.tableRows = []
+        self.tableSize = self.getAndIncrementTableSize()
     
     def getVarCount(self):
         return self.varCount
@@ -56,6 +56,12 @@ class SymbolTable:
     def decrementNestingLevel(self):
         self.nestingLevel -= 1
     
+    def getClassification(self, row):
+        for r in self.tableRows:
+            print r
+            if r == row:
+                return r['classification']
+    
     def contains(self, row):
         for r in self.tableRows:
             if r == row:
@@ -76,11 +82,20 @@ class SymbolTable:
     
     def findSymbol(self, lexeme, c):
         for r in self.tableRows:
-            if r['lexeme'] == lexeme and r['classification'] == c:
-                return r
+            if c:
+                if r['lexeme'] == lexeme and r['classification'] == c:
+                    return r
+            else:
+                if r['lexeme'] == lexeme:
+                    return r
         return None
     
     def addDataSymbolsToTable(self, c, ids, attributes):
+        if len(ids) != len(attributes):
+            att = attributes
+            attributes = []
+            for i in range(len(ids)):
+                attributes.append(att)
         for i in range(len(ids)):
             attribute = attributes[i]
             lex = ids[i]
@@ -109,7 +124,7 @@ class SymbolTable:
             print "Failed to add Module Symbol to Table: " + c
     
     def printTable(self):
-        print "SymbolTable Name: " + self.scopeName + ", Nesting Level: " + self.nestingLevel + ", Branch Label: " + self.branch + ", Size: " + self.tableSize
-            
+        print "SymbolTable Name: " + self.scopeName + ", Nesting Level: " + str(self.nestingLevel) + ", Branch Label: " + self.branch + ", Size: " + str(self.tableSize)
+        
         for r in self.tableRows:
             print "Row " + str(r)
