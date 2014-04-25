@@ -263,3 +263,116 @@ def CommentFSA(currentChar):
                 else:
                     return Token(types.MP_RUN_COMMENT, lex, startingLine, startingCol)
     return Token(types.COMMENT, lex, startingLine, startingCol)
+
+def SymbolFSA(currentChar):
+    token = None
+    state = 1
+    lex = ""
+    current = currentChar
+    while state != 18:
+        if not scanner.hasNextChar() and (state >= 2 and state <= 17):
+            state = 18
+        else:
+            if state == 1:
+                if current['lexeme'] == ".":
+                    state = 2
+                elif current['lexeme'] == ",":
+                    state = 3
+                elif current['lexeme'] == ";":
+                    state = 4
+                elif current['lexeme'] == "(":
+                    state = 5
+                elif current['lexeme'] == ")":
+                    state = 6
+                elif current['lexeme'] == "=":
+                    state = 7
+                elif current['lexeme'] == "+":
+                    state = 8
+                elif current['lexeme'] == "-":
+                    state = 9
+                elif current['lexeme'] == "*":
+                    state = 10
+                elif current['lexeme'] == ":":
+                    state = 11
+                elif current['lexeme'] == "<":
+                    state = 13
+                elif current['lexeme'] == ">":
+                    state = 16
+                elif current['lexeme'] == "/":
+                    state = 19
+                lex += current['lexeme']
+            elif state in range(2, 11) or state == 19:
+                state = 18
+            elif state == 11: # :
+                if current['lexeme'] == "=":
+                    current = scanner.getNextChar()
+                    lex += current['lexeme']
+                    state = 12
+                else:
+                    state = 18
+            elif state == 12: # :=
+                state = 18
+            elif state == 13: # <
+                if current['lexeme'] == ">":
+                    current = scanner.getNextChar()
+                    lex += current
+                    state = 14
+                elif current['lexeme'] == "=":
+                    current = scanner.getNextChar()
+                    lex += current
+                    state = 15
+                else:
+                    state = 18
+            elif state == 14: # <>
+                state = 18
+            elif state == 15: # <=
+                state = 18
+            elif state == 16: # >
+                if current['lexeme'] == "=":
+                    current = scanner.getNextChar()
+                    lex += current['lexeme']
+                    state = 17
+                else:
+                    state = 18
+            elif state == 17: # >=
+                state = 18
+
+    thisType = None
+    if lex == ".":
+        thisType = types.MP_PERIOD
+    elif lex == ",":
+        thisType = types.MP_COMMA
+    elif lex == ";":
+        thisType = types.MP_SCOLON
+    elif lex == "(":
+        thisType = types.MP_LPAREN
+    elif lex == ")":
+        thisType = types.MP_RPAREN
+    elif lex == "=":
+        thisType = types.MP_EQUAL
+    elif lex == ">":
+        thisType = types.MP_GTHAN
+    elif lex == ">=":
+        thisType = types.MP_GEQUAL
+    elif lex == "<":
+        thisType = types.MP_LTHAN
+    elif lex == "<=":
+        thisType = types.MP_LEQUAL
+    elif lex == "<>":
+        thisType = types.MP_NEQUAL
+    elif lex == ":=":
+        thisType = types.MP_ASSIGN
+    elif lex == "+":
+        thisType = types.MP_PLUS
+    elif lex == "-":
+        thisType = types.MP_MINUS
+    elif lex == "*":
+        thisType = types.MP_TIMES
+    elif lex == "/":
+        thisType = types.MP_DIV
+    elif lex == ":":
+        thisType = types.MP_COLON
+
+    token = Token(thisType, lex, current['lineIndex'], current['colIndex'] - len(lex))
+
+    return token
