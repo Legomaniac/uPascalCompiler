@@ -1,9 +1,18 @@
 from token import *
 from tokens import *
+from tokenTypes import *
 import fsa as fsa
 
 # a hack I found for printing a single char as a string representation
 def dq(s): return '"%s"' %s
+
+#Auxiliary Regular Expressions
+IDENTIFIER_CHARS = string.letters + "_"
+NUMBER_CHARS = string.digits
+LITERAL_CHAR = "\'"
+SYMBOL_CHARS = "." + "," + ";" + "(" + ")" + "=" + "<" + ">" + "+" + "-" + "*" + "/" + ":"
+WHITESPACE_CHARS = " \t\n"
+COMMENT_CHAR = "{"
   
 def initialize(sourceTextArg): 
     global sourceText, lastIndex, sourceIndex, lineIndex, colIndex 
@@ -14,95 +23,73 @@ def initialize(sourceTextArg):
     colIndex     = -1
     fsa.getChar()
 
+def checkScanError(curToken):
+    """Check for Run on Comment"""
+    if curToken.getType() == types.MP_RUN_COMMENT:
+        print "SCAN ERROR: Run on comment found @ line:" + str(curToken.getLineNumber()) + ", column: " + str(curToken.getColNumber())
+    elif curToken.getType() == types.MP_RUN_STRING:
+        print "SCAN ERROR: Run on string found.. lex: " + str(curToken.getLexeme()) + " @ line:" + str(curToken.getLineNumber()) + ", column: " + str(curToken.getColNumber())
+    elif curToken.getType() == types.MP_ERROR:
+        print "SCAN ERROR: Invalid character (" + str(curToken.getLexeme()) + ") found @ line:" + str(curToken.getLineNumber()) + ", column: " + str(curToken.getColNumber())
+
 def getToken():
+    nextToken = getNextToken()
+    while nextToken.getType() == types.MP_WHITESPACE or nextToken.getType() == types.MP_COMMENT:
+        nextToken = getNextToken()
+    checkScanError(nextToken)
+    return nextToken
+
+def getNextToken():
     '''char1 is the next char, char2 is the char after char1 (looks two ahead)'''
-    # Process whitespace and comments
-    while fsa.char1 in WHITESPACE_CHARS or fsa.char2 == "/*":
-        fsa.process_whitespace()
- 
-    # Create a new token. Token gets line/col num from the character.
-    token = Token(fsa.character)
-
-    # If EOF, just return that token
-    if fsa.char1 == "\0":
-        token.Type = types.MP_EOF
-        return token
-
-    # Identifier FSA
-    if fsa.char1 in IDENTIFIER_START:
-        token = fsa.identifier_fsa(token)
-        return token
-
-    # Numbers FSA
-    if fsa.char1 in INTEGER:
-        token = fsa.numbers_fsa(token)
-        return token
-
-    # String FSA
-    if fsa.char1 in STRING_STARTCHARS:
-        token = fsa.string_fsa(token)
-        return token
-
-    # Symbols FSA
-    if fsa.char1 in SingleCharacterSymbols:
-        token = fsa.symbols_fsa(token)
-        return token
-    
-    # If this was reached, we know that we found a char that is not in our defined language
-    print "Found a character or symbol that I do not recognize: " + token.getErrorMsg(str(fsa.char1))
-    return None
-    
-
+    foundToken = None
+    if lookahead(1) is types.MP_EOF:
+        foundToken = Token(types.MP_EOF, "EOF", lineIndex, colIndex)
+    else:
+        nextChar = getNextChar()
+        if nextChar['lexeme'] in IDENTIFIER_CHARS:
+            foundToken = fsa.IdentifierFSA(nextChar)
+        elif nextChar['lexeme'] in NUMBER_CHARS:
+            foundToken = fsa.NumbersFSA(nextChar)
+        elif nextChar['lexeme'] in LITERAL_CHAR:
+            foundToken = fsa.LiteralFSA(nextChar)
+        elif nextChar['lexeme'] in SYMBOL_CHARS:
+            foundToken = fsa.SymbolFSA(nextChar)
+        elif nextChar['lexeme'] in WHITESPACE_CHARS:
+            foundToken = fsa.WhitespaceFSA(nextChar)
+        elif nextChar['lexeme'] in COMMENT_CHAR:
+            foundToken = fsa.CommentFSA(nextChar)
+        else:
+            foundToken = Token(types.MP_ERROR, str(nextChar['lexeme']), nextChar['lineIndex'], nextChar['colIndex'])
+        return foundToken
 #-------------------------------------------
 def getNextChar(): 
     """ 
     Return the next character in sourceText. 
     """
-    global lastIndex, sourceIndex, lineIndex, colIndex 
-  
-    sourceIndex += 1    # increment the index in sourceText 
-  
+    global lastIndex, sourceIndex, lineIndex, colIndex
+    
+    sourceIndex += 1 # increment the index in sourceText 
     # maintain the line count 
     if sourceIndex > 0: 
-        if sourceText[sourceIndex - 1] == "\n": 
+        if sourceText[sourceIndex - 1] == "\n":
             lineIndex += 1
             colIndex  = -1
-  
-    colIndex += 1
     
-    #Check for index at eof
-    if sourceIndex > lastIndex:
-        char = Character(ENDMARK, lineIndex, colIndex, sourceIndex,sourceText) 
-    else: 
-        c = sourceText[sourceIndex] 
-        char = Character(c, lineIndex, colIndex, sourceIndex, sourceText) 
-  
+    colIndex += 1
+    lex = sourceText[sourceIndex] 
+    char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex, 'sourceText':sourceText}
     return char 
   
 def lookahead(offset=1): 
     index = sourceIndex + offset
     #Check for index at eof
     if index > lastIndex: 
-        return ENDMARK 
+        return types.MP_EOF
     else: 
         return sourceText[index]
-        
-#-------------------------------------------
-ENDMARK = "\0"  # "lowvalues"   
-class Character: 
-    def __init__(self, c, lineIndex, colIndex, sourceIndex, sourceText): 
-        self.lexeme = c 
-        self.sourceIndex = sourceIndex 
-        self.lineIndex = lineIndex 
-        self.colIndex = colIndex 
-        self.sourceText = sourceText 
-  
-  
-    def __str__(self): 
-        lexeme = self.lexeme 
-        if   lexeme == " " : lexeme = "   space"
-        elif lexeme == "\n" : lexeme = "   newline"
-        elif lexeme == "\t" : lexeme = "   tab"
-        elif lexeme == ENDMARK : lexeme = "   eof"
-  
-        return (str(self.lineIndex).rjust(6) + str(self.colIndex).rjust(4) + "  " + lexeme)
+
+def hasNextChar():
+    if sourceText[sourceIndex - 1] == "\n":
+        return False
+    else:
+        return True

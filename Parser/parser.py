@@ -291,10 +291,13 @@ def procedureHeading(branchLbl):
     if lookAhead.getType() == types.MP_PROCEDURE:
         match(types.MP_PROCEDURE)
         procID = procedureIdentifier()
+        print procID
+        print branchLbl
         parameters = optionalFormalParameterList()
         for p in parameters:
             attributes.append(p['attribute'])
             ids.append(p['lexeme'])
+        print parameters
         symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
         addSymbolTable(procID, branchLbl['type'])
         symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
@@ -420,6 +423,7 @@ CompoundStatement -> "begin" StatementSequence "end"
 """
 def compoundStatement():
     if lookAhead.getType() == types.MP_BEGIN:
+        print lookAhead.getLexeme()
         match(types.MP_BEGIN)
         statementSequence()
         match(types.MP_END)
@@ -475,6 +479,7 @@ Statement -> EmptyStatement
           -> ProcedureStatement
 """
 def statement():
+    print lookAhead.getLexeme()
     if lookAhead.getType() == types.MP_UNTIL or \
         lookAhead.getType() == types.MP_END or \
         lookAhead.getType() == types.MP_ELSE or \

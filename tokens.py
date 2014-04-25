@@ -69,13 +69,3 @@ MP_RUN_COMMENT
 MP_RUN_STRING
 MP_ERROR
 """
-
-#Auxiliary Regular Expressions
-IDENTIFIER_START = string.letters
-IDENTIFIER_CHARS = string.letters + string.digits + "_"
-INTEGER = string.digits
-FIXED = string.digits + "."
-FLOAT = string.digits + "." + "e" + "E" + "+" + "-"
-STRING_STARTCHARS = "'" + '"'
-WHITESPACE_CHARS = " \t\n"
-EPSILON = ""

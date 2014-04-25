@@ -71,13 +71,10 @@ class Analyzer:
             r = self.getSemRecIdRow(rec)
             t = r['type']
         elif rec['type'] == recTypes.LITERAL:
-            t = rec['type']
+            t = rec['varType']
         else:
             self.semanticError("Record type: " + str(rec['type']) + " does not have a type.")
         return t
-    
-    #def getSemRecVarType(self, rec):
-        
     
     def getSemRecIdRow(self, rec):
         lex = rec['lexeme']
@@ -87,7 +84,7 @@ class Analyzer:
             self.semanticError("Identifier: type " + str(c) + " lexeme " + str(lex) + " is not declared in current scope.")
         return r
     
-    def generateOffset(table, data):
+    def generateOffset(self, table, data):
         nestingLvl = str(table.getNestingLevel())
         memOffset = str(data['offset'])
         nestingLvl = 'D' + nestingLvl
@@ -718,8 +715,6 @@ class Analyzer:
     def genAssignCast(self, leftRec, rightRec):
         leftType = self.getSemRecType(leftRec)
         rightType = self.getSemRecType(rightRec)
-        print "left: " + str(leftRec)
-        print "right: " + str(rightRec)
         returnRec = None
         if leftType == rightType:
             returnRec = rightRec
@@ -769,13 +764,13 @@ class Analyzer:
         if leftRow['classification'] == classification.VARIABLE:
             leftTable = self.findSymbolTable(leftRow)
             leftOffset = self.generateOffset(leftTable, leftRow)
-            self.pop(leftOffset)
+            self.genPOP(leftOffset)
         elif leftRow['classification'] == classification.FUNCTION:
             funcRow = leftRow
             nestingLevel = symTable['nestingLevel']
             register = 'D' + idRec['nestingLevel']
             offset = '-1(' + register + ')'
-            self.pop(offset)
+            self.genPOP(offset)
             funcRow['returnValue'] = True
         elif leftRow['classification'] == classification.PARAMETER:
             leftTable = self.findSymbolTable(leftRow)
@@ -784,10 +779,10 @@ class Analyzer:
             offset = None
             if paramMode == mode.VALUE:
                 offset = self.generateOffset(leftTable, row)
-                self.pop(offset)
+                self.genPOP(offset)
             elif paramMode == mode.VARIABLE:
                 offset = '@' + self.generateOffset(leftTable, row)
-                self.pop(offset)
+                self.genPOP(offset)
     
     def genAssignFor(self, idRec, exp):
         idType = self.getSemRecType(idRec)
