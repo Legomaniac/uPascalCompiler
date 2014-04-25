@@ -93,3 +93,6 @@ def hasNextChar():
         return False
     else:
         return True
+
+def setColumnIndex(index):
+    colIndex = index
