@@ -66,14 +66,15 @@ def getNextChar():
     Return the next character in sourceText. 
     """
     global lastIndex, sourceIndex, lineIndex, colIndex
-
+    
+    sourceIndex += 1 # increment the index in sourceText
     # maintain the line count
     if sourceIndex > 0:
-        if sourceText[sourceIndex - 1] == "\n":
+        while sourceText[sourceIndex] == "\n":
             lineIndex += 1
             colIndex  = -1
-    sourceIndex += 1 # increment the index in sourceText
-
+            sourceIndex += 1
+    
     colIndex += 1
     lex = sourceText[sourceIndex] 
     char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex, 'sourceText':sourceText}
