@@ -11,7 +11,7 @@ IDENTIFIER_CHARS = string.letters + "_"
 NUMBER_CHARS = string.digits
 LITERAL_CHAR = "\'"
 SYMBOL_CHARS = "." + "," + ";" + "(" + ")" + "=" + "<" + ">" + "+" + "-" + "*" + "/" + ":"
-WHITESPACE_CHARS = " \t\n"
+WHITESPACE_CHARS = " \t"
 COMMENT_CHAR = "{"
   
 def initialize(sourceTextArg): 
@@ -21,7 +21,6 @@ def initialize(sourceTextArg):
     sourceIndex  = -1
     lineIndex    =  0
     colIndex     = -1
-    #getToken()
 
 def checkScanError(curToken):
     """Check for Run on Comment"""
@@ -67,14 +66,14 @@ def getNextChar():
     Return the next character in sourceText. 
     """
     global lastIndex, sourceIndex, lineIndex, colIndex
-    
-    sourceIndex += 1 # increment the index in sourceText 
-    # maintain the line count 
-    if sourceIndex > 0: 
+
+    # maintain the line count
+    if sourceIndex > 0:
         if sourceText[sourceIndex - 1] == "\n":
             lineIndex += 1
             colIndex  = -1
-    
+    sourceIndex += 1 # increment the index in sourceText
+
     colIndex += 1
     lex = sourceText[sourceIndex] 
     char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex, 'sourceText':sourceText}

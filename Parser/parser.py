@@ -99,8 +99,7 @@ Rule 1:
 SystemGoal -> Program EOF
 """
 def systemGoal():
-    test = lookAhead.getType()
-    if test == types.MP_PROGRAM:
+    if lookAhead.getType() == types.MP_PROGRAM:
         program()
         match(types.MP_EOF)
     else:
