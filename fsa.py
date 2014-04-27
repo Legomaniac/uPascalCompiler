@@ -49,11 +49,12 @@ def IdentifierFSA(currentChar):
                     return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
             else:
                 continue
-    if current['lexeme'] in ReservedWords:
-        return Token(ReservedWords[current['lexeme']], lex, current['lineIndex'], current['colIndex'] - len(lex))
+    if lex in ReservedWords:
+        return Token(ReservedWords[lex], lex, current['lineIndex'], current['colIndex'] - len(lex))
     else:
         return Token(types.MP_IDENTIFIER, lex, current['lineIndex'], current['colIndex'] - len(lex))
 
+"""FSA for Literals"""
 def LiteralFSA(currentChar):
     state = 1
     lex = ""
@@ -91,6 +92,7 @@ def LiteralFSA(currentChar):
                     return Token(types.MP_RUN_STRING, lex, startingLine, startingCol)
     return Token(types.MP_STRING_LIT, lex, startingLine, startingCol)
 
+"""FSA for Numbers"""
 def NumbersFSA(currentChar):
     token = None
     state = 1
@@ -208,6 +210,7 @@ def NumbersFSA(currentChar):
             token = Token(Type, lex, current['lineIndex'], current['colIndex'] - len(lex))
     return token
 
+"""FSA for Whitespace"""
 def WhitespaceFSA(currentChar):
     token = None
     state = 1
@@ -230,6 +233,7 @@ def WhitespaceFSA(currentChar):
                     state = 3
     return Token(types.MP_WHITESPACE, lex, current['lineIndex'], current['colIndex'] - len(lex))
 
+"""FSA for Comments"""
 def CommentFSA(currentChar):
     state = 1
     lex = ""
@@ -264,6 +268,7 @@ def CommentFSA(currentChar):
                     return Token(types.MP_RUN_COMMENT, lex, startingLine, startingCol)
     return Token(types.COMMENT, lex, startingLine, startingCol)
 
+"""FSA for Symbols"""
 def SymbolFSA(currentChar):
     token = None
     state = 1

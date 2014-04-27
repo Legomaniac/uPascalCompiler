@@ -21,7 +21,7 @@ def initialize(sourceTextArg):
     sourceIndex  = -1
     lineIndex    =  0
     colIndex     = -1
-    fsa.getChar()
+    #getToken()
 
 def checkScanError(curToken):
     """Check for Run on Comment"""
