@@ -7,24 +7,15 @@ import scanner as scanner
 class ScanError(Exception): pass
 
 """FSA for Identifiers"""
-def IdentifierFSA(currentChar):
+def IdentifierFSA():
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     while state != 4:
-        if not scanner.hasNextChar() and state == 2:
+        if scanner.hasNextChar() is False and state == 2:
             state = 4
         else:
             if state == 1:
-                if current['lexeme'] in string.letters:
-                    state = 2
-                    lex += current['lexeme']
-                elif current['lexeme'] == "_":
-                    state = 3
-                    lex += current['lexeme']
-                else:
-                    return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
-            elif state == 2:
                 if scanner.hasNextChar():
                     current = scanner.getNextChar()
                     if current['lexeme'] in string.letters:
@@ -34,13 +25,25 @@ def IdentifierFSA(currentChar):
                         state = 3
                         lex += current['lexeme']
                     else:
-                        state = 4
+                        return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
                 else:
                     return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
+            elif state == 2:
+                current = scanner.getCurChar()
+                if current['lexeme'] in string.letters or current['lexeme'] in string.digits:
+                    current = scanner.getNextChar()
+                    state = 2
+                    lex += current['lexeme']
+                elif current['lexeme'] == "_":
+                    current = scanner.getNextChar()
+                    state = 3
+                    lex += current['lexeme']
+                else:
+                    state = 4
             elif state == 3:
                 if scanner.hasNextChar():
                     current = scanner.getNextChar()
-                    if current['lexeme'] in string.letters:
+                    if current['lexeme'] in string.letters or current['lexeme'] in string.digits:
                         state = 2
                         lex += current['lexeme']
                     else:
@@ -49,27 +52,26 @@ def IdentifierFSA(currentChar):
                     return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
             else:
                 continue
-    if lex in ReservedWords:
-        return Token(ReservedWords[lex], lex, current['lineIndex'], current['colIndex'] - len(lex))
+    if lex.lower() in ReservedWords:
+        return Token(ReservedWords[lex.lower()], lex.lower(), current['lineIndex'], current['colIndex'] - len(lex))
     else:
         return Token(types.MP_IDENTIFIER, lex, current['lineIndex'], current['colIndex'] - len(lex))
 
 """FSA for Literals"""
-def LiteralFSA(currentChar):
+def LiteralFSA():
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     startingLine = current['lineIndex']
     startingCol = current['colIndex']
     while state != 4:
-        if not scanner.hasNextChar() and state == 3:
+        if scanner.hasNextChar() is False and state == 3:
             state = 4
         else:
             if state == 1:
+                current = scanner.getNextChar()
                 if current['lexeme'] == "\'":
                     state = 2
-                else:
-                    current = scanner.getNextChar()
             elif state == 2:
                 if scanner.hasNextChar():
                     current = scanner.getNextChar()
@@ -82,7 +84,7 @@ def LiteralFSA(currentChar):
                     return Token(types.MP_RUN_STRING, lex, startingLine, startingCol)
             elif state == 3:
                 if scanner.hasNextChar():
-                    if current['lexeme'] == "\'":
+                    if scanner.getCurChar() == "\'":
                         current = scanner.getNextChar()
                         state = 2
                         lex += current['lexeme']
@@ -93,33 +95,37 @@ def LiteralFSA(currentChar):
     return Token(types.MP_STRING_LIT, lex, startingLine, startingCol)
 
 """FSA for Numbers"""
-def NumbersFSA(currentChar):
+def NumbersFSA():
     token = None
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     acceptedRule = 0
     while state != 8:
         if state == 1:
+            current = scanner.getNextChar()
             if current['lexeme'] in string.digits:
                 state = 2
                 lex += current['lexeme']
                 token = Token(types.MP_INTEGER_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
             else:
-                return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'])
+                return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
         elif state == 2:
             if scanner.hasNextChar():
-                current = scanner.getNextChar()
+                current = scanner.getCurChar()
                 if current['lexeme'] in string.digits:
+                    current = scanner.getNextChar()
                     state = 2
                     lex += current['lexeme']
                     token = Token(types.MP_INTEGER_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
                 elif current['lexeme'] == ".":
                     token = Token(types.MP_INTEGER_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
+                    current = scanner.getNextChar()
                     state = 4
                     lex += current['lexeme']
                 elif current['lexeme'] == "e" or current['lexeme'] == "E":
                     token = Token(types.MP_INTEGER_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
+                    current = scanner.getNextChar()
                     state = 3
                     lex += current['lexeme']
                 else:
@@ -139,10 +145,10 @@ def NumbersFSA(currentChar):
                     state = 5
                     lex += current['lexeme']
                 else:
-                    scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                     return token
             else:
-                scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                 return token
         elif state == 4:
             if scanner.hasNextChar():
@@ -151,15 +157,16 @@ def NumbersFSA(currentChar):
                     state = 7
                     lex += current['lexeme']
                 else:
-                    scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                     return token
             else:
-                scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                 return token
         elif state == 5:
             if scanner.hasNextChar():
-                current = scanner.getNextChar()
+                current = scanner.getCurChar()
                 if current['lexeme'] in string.digits:
+                    current = scanner.getNextChar()
                     state = 5
                     lex += current['lexeme']
                 else:
@@ -176,20 +183,22 @@ def NumbersFSA(currentChar):
                     state = 5
                     lex += current['lexeme']
                 else:
-                    scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                     return token
             else:
-                scanner.setColumnIndex(current['colIndex'] + len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
                 return token
         elif state == 7:
             if scanner.hasNextChar():
-                current = scanner.getNextChar()
+                current = scanner.getCurChar()
                 if current['lexeme'] in string.digits:
+                    current = scanner.getNextChar()
                     state = 7
                     lex += current['lexeme']
                     token = Token(types.MP_FIXED_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
                 elif current['lexeme'] == "e" or current['lexeme'] == "E":
                     token = Token(types.MP_FIXED_LIT, lex, current['lineIndex'], current['colIndex'] - len(lex))
+                    current = scanner.getNextChar()
                     state = 3
                     lex += current['lexeme']
                 else:
@@ -203,30 +212,30 @@ def NumbersFSA(currentChar):
             Type = None
             if acceptedRule == 2:
                 Type = types.MP_INTEGER_LIT
-            elif acceptedRule == 5:
-                Type = types.MP_FLOAT_LIT
-            elif acceptedRule == 7:
+            elif acceptedRule == 5 or acceptedRule == 7:
                 Type = types.MP_FLOAT_LIT
             token = Token(Type, lex, current['lineIndex'], current['colIndex'] - len(lex))
     return token
 
 """FSA for Whitespace"""
-def WhitespaceFSA(currentChar):
+def WhitespaceFSA():
     token = None
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     while state != 3:
-        if not scanner.hasNextChar() and state == 2:
+        if scanner.hasNextChar() is False and state == 2:
             state = 3
         else:
             if state == 1:
+                current = scanner.getNextChar()
                 if current['lexeme'] == " " or current['lexeme'] == "\t":
                     state = 2
                     lex += current['lexeme']
             elif state == 2:
-                current = scanner.getNextChar()
+                current = scanner.getCurChar()
                 if current['lexeme'] == " " or current['lexeme'] == "\t":
+                    current = scanner.getNextChar()
                     state = 2
                     lex += current['lexeme']
                 else:
@@ -234,24 +243,25 @@ def WhitespaceFSA(currentChar):
     return Token(types.MP_WHITESPACE, lex, current['lineIndex'], current['colIndex'] - len(lex))
 
 """FSA for Comments"""
-def CommentFSA(currentChar):
+def CommentFSA():
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     startingLine = current['lineIndex']
     startingCol = current['colIndex']
     openBraceCount = 0
     while state != 3:
-        if not scanner.hasNextChar() and state == 3:
+        if scanner.hasNextChar() is False and state == 3:
             state = 3
         else:
             if state == 1:
+                current = scanner.getNextChar()
                 if current['lexeme'] == "{":
                     openBraceCount += 1
                     state = 2
             elif state == 2:
                 if scanner.hasNextChar():
-                    current = scanner.getNextChar()
+                    current = scanner.getCurChar()
                     if current['lexeme'] == "}":
                         openBraceCount -= 1
                         if openBraceCount == 0:
@@ -269,16 +279,17 @@ def CommentFSA(currentChar):
     return Token(types.COMMENT, lex, startingLine, startingCol)
 
 """FSA for Symbols"""
-def SymbolFSA(currentChar):
+def SymbolFSA():
     token = None
     state = 1
     lex = ""
-    current = currentChar
+    current = scanner.getCurChar()
     while state != 18:
-        if not scanner.hasNextChar() and (state >= 2 and state <= 17):
+        if scanner.hasNextChar() is False and (state >= 2 and state <= 17):
             state = 18
         else:
             if state == 1:
+                current = scanner.getNextChar()
                 if current['lexeme'] == ".":
                     state = 2
                 elif current['lexeme'] == ",":
@@ -309,6 +320,7 @@ def SymbolFSA(currentChar):
             elif state in range(2, 11) or state == 19:
                 state = 18
             elif state == 11: # :
+                current = scanner.getCurChar()
                 if current['lexeme'] == "=":
                     current = scanner.getNextChar()
                     lex += current['lexeme']
@@ -318,6 +330,7 @@ def SymbolFSA(currentChar):
             elif state == 12: # :=
                 state = 18
             elif state == 13: # <
+                current = scanner.getCurChar()
                 if current['lexeme'] == ">":
                     current = scanner.getNextChar()
                     lex += current
@@ -333,6 +346,7 @@ def SymbolFSA(currentChar):
             elif state == 15: # <=
                 state = 18
             elif state == 16: # >
+                current = scanner.getCurChar()
                 if current['lexeme'] == "=":
                     current = scanner.getNextChar()
                     lex += current['lexeme']

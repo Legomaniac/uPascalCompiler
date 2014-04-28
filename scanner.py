@@ -11,19 +11,18 @@ IDENTIFIER_CHARS = string.letters + "_"
 NUMBER_CHARS = string.digits
 LITERAL_CHAR = "\'"
 SYMBOL_CHARS = "." + "," + ";" + "(" + ")" + "=" + "<" + ">" + "+" + "-" + "*" + "/" + ":"
-WHITESPACE_CHARS = " \t"
+WHITESPACE_CHARS = " " + "\t"
 COMMENT_CHAR = "{"
   
 def initialize(sourceTextArg): 
     global sourceText, lastIndex, sourceIndex, lineIndex, colIndex 
     sourceText = str(sourceTextArg) 
-    lastIndex    = len(sourceText) - 1
-    sourceIndex  = -1
+    lastIndex    = len(sourceText)
+    sourceIndex  = 0
     lineIndex    =  0
-    colIndex     = -1
+    colIndex     = 0
 
 def checkScanError(curToken):
-    """Check for Run on Comment"""
     if curToken.getType() == types.MP_RUN_COMMENT:
         print "SCAN ERROR: Run on comment found @ line:" + str(curToken.getLineNumber()) + ", column: " + str(curToken.getColNumber())
     elif curToken.getType() == types.MP_RUN_STRING:
@@ -39,60 +38,66 @@ def getToken():
     return nextToken
 
 def getNextToken():
-    '''char1 is the next char, char2 is the char after char1 (looks two ahead)'''
     foundToken = None
-    if lookahead(1) is types.MP_EOF:
+    if lastLine() and hasNextChar is False:
         foundToken = Token(types.MP_EOF, "EOF", lineIndex, colIndex)
     else:
-        nextChar = getNextChar()
+        nextChar = getCurChar()
         if nextChar['lexeme'] in IDENTIFIER_CHARS:
-            foundToken = fsa.IdentifierFSA(nextChar)
+            foundToken = fsa.IdentifierFSA()
         elif nextChar['lexeme'] in NUMBER_CHARS:
-            foundToken = fsa.NumbersFSA(nextChar)
+            foundToken = fsa.NumbersFSA()
         elif nextChar['lexeme'] in LITERAL_CHAR:
-            foundToken = fsa.LiteralFSA(nextChar)
+            foundToken = fsa.LiteralFSA()
         elif nextChar['lexeme'] in SYMBOL_CHARS:
-            foundToken = fsa.SymbolFSA(nextChar)
+            foundToken = fsa.SymbolFSA()
         elif nextChar['lexeme'] in WHITESPACE_CHARS:
-            foundToken = fsa.WhitespaceFSA(nextChar)
+            foundToken = fsa.WhitespaceFSA()
         elif nextChar['lexeme'] in COMMENT_CHAR:
-            foundToken = fsa.CommentFSA(nextChar)
-        else:
-            foundToken = Token(types.MP_ERROR, str(nextChar['lexeme']), nextChar['lineIndex'], nextChar['colIndex'])
+            foundToken = fsa.CommentFSA()
+        if foundToken is None:
+            nextChar = getNextChar()
+            Token(types.MP_ERROR, str(nextChar['lexeme']), nextChar['lineIndex'], nextChar['colIndex'] -1)
+        print "Token found: " + foundToken.getLexeme() + ", type: " + str(foundToken.getType())
         return foundToken
-#-------------------------------------------
+#--------------------------------------------------
+#Always have to look one ahead of current position
+#--------------------------------------------------
 def getNextChar(): 
     """ 
-    Return the next character in sourceText. 
+    Return the current character in sourceText and set the next one. 
     """
     global lastIndex, sourceIndex, lineIndex, colIndex
-    
-    sourceIndex += 1 # increment the index in sourceText
-    # maintain the line count
+    char = getCurChar()
+    sourceIndex += 1
     if sourceIndex > 0:
         while sourceText[sourceIndex] == "\n":
             lineIndex += 1
-            colIndex  = -1
+            colIndex  = 0
             sourceIndex += 1
-    
     colIndex += 1
-    lex = sourceText[sourceIndex] 
-    char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex, 'sourceText':sourceText}
-    return char 
-  
-def lookahead(offset=1): 
-    index = sourceIndex + offset
-    #Check for index at eof
-    if index > lastIndex: 
-        return types.MP_EOF
-    else: 
-        return sourceText[index]
+    return char
+
+def getCurChar():
+    """ 
+    Return the current character in sourceText. 
+    """
+    lex = sourceText[sourceIndex]
+    char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex}
+    return char
+
+def lastLine(): 
+    if sourceIndex == lastIndex:
+        return True
+    else:
+        return False
 
 def hasNextChar():
-    if sourceText[sourceIndex - 1] == "\n":
-        return False
-    else:
+    if sourceIndex <= lastIndex:
         return True
+    else:
+        return False
 
-def setColumnIndex(index):
+def setIndexes(col, src):
     colIndex = index
+    sourceIndex = sourceIndex + src

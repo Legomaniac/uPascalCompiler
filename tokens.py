@@ -5,7 +5,7 @@ from tokenTypes import types
 ReservedWords = {
 "and" : types.MP_AND,
 "begin" : types.MP_BEGIN,
-"Boolean" : types.MP_BOOLEAN,
+"boolean" : types.MP_BOOLEAN,
 "div" : types.MP_DIV,
 "do" : types.MP_DO,
 "downto" : types.MP_DOWNTO,

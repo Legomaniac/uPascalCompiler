@@ -1,6 +1,6 @@
 program Program1;
-  var A : integer;
+    var A : integer;
     begin
-      A := 1;
-      Write('A = ', A)
+        A := 1;
+        Write('A = ', A);
     end.
