@@ -1,4 +1,5 @@
 import sys
+import datetime
 sys.path.insert(0, '../')
 from tokenTypes import types as tokenTypes
 sys.path.insert(0, '../Parser/')
@@ -9,7 +10,9 @@ from Parser.types import varTypes
 from Parser.recordTypes import recTypes
 
 class Analyzer:
-    o = open('../output.up', 'w')
+
+    outfile = "Output/output-" + datetime.datetime.now().strftime("%m%d%y-%H%M") + ".up"
+    o = open(outfile, 'w')
     symbolTables = None
     
     def __init__(self, tables):
@@ -291,8 +294,8 @@ class Analyzer:
             parCount = table.getParCount()
             if block == "program":
                 self.genComment(nameRec['scope'] + ' start')
-                self.o.write("SP #1 SP" + '\n') # reserve space for old register value
-                self.o.write("SP #" + str(varCount) + " SP" + '\n') # reserve space for variables in program
+                self.genADD('SP', '#1', 'SP') # reserve space for old register value
+                self.genADD('SP', '#' + str(varCount), 'SP') # reserve space for variables in program
                 register = 'D' + nameRec['nestingLevel']
                 offset = '-' + str(varCount + 1) + '(SP)'
                 self.genMOV(register, offset)
@@ -868,4 +871,4 @@ class Analyzer:
                 self.semanticError(resultType + " doesn't have relOps")
     
     def genComment(self, comment):
-        self.o.write('\t ' + str(comment) + '\n')
+        print "\t " + str(comment) + "\n"
