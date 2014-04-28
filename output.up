@@ -1,0 +1,22 @@
+BR L1
+L1:
+	 Program1 start
+SP #1 SP
+SP #1 SP
+MOV D0 -2(SP)
+SUB SP #2 D0
+	 activation end
+	 push lexeme: 1, type: INTEGER
+PUSH #1
+POP 1(D0)
+	 push lexeme: A = , type: STRING
+PUSH #"A = "
+WRTS
+	 push class: VARIABLE, lexeme: A, type: INTEGER, offset: 1(D0)
+PUSH 1(D0)
+WRTS
+	 deactivation start
+MOV -2(SP) D0
+SUB SP #2 SP
+	 Program1 end
+HLT

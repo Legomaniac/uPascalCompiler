@@ -9,13 +9,13 @@ from Parser.types import varTypes
 from Parser.recordTypes import recTypes
 
 class Analyzer:
-    o = None
+    o = open('../output.up', 'w')
     symbolTables = None
     
     def __init__(self, tables):
-        global symbolTables, o
-        o = open('../output.up', 'w')
-        if o.closed:
+        global symbolTables
+
+        if self.o.closed:
             print "ERROR: Output file not opened properly..."
         symbolTables = tables
         
@@ -95,7 +95,7 @@ class Analyzer:
     # VM Assembly Functions
     # --------------------------------------------------------------
     def genHLT(self):
-        o.write("HLT")
+        self.o.write("HLT" + '\n')
     
     def genRead(self, readRec, isVar):
         thisRow = self.getSemRecIdRow(readRec)
@@ -116,13 +116,13 @@ class Analyzer:
             self.semanticError("Can't read into a variable of " + str(thisType))
     
     def genRD(self, offset):
-        o.write("RD " + offset)
+        self.o.write("RD " + offset + '\n')
     
     def genRDF(self, offset):
-        o.write("RDF " + offset)
+        self.o.write("RDF " + offset + '\n')
     
     def genRDS(self, offset):
-        o.write("RDS " + offset)
+        self.o.write("RDS " + offset + '\n')
     
     def genWrite(self, writeRec, expRec):
         if writeRec['tokenType'] == tokenTypes.MP_WRITE:
@@ -131,145 +131,145 @@ class Analyzer:
             self.genWRTLNS()
     
     def genWRTS(self):
-        o.write("WRTS")
+        self.o.write("WRTS" + '\n')
     
     def genWRTLN(self):
-        o.write("WRTLN")
+        self.o.write("WRTLN" + '\n')
     
     def genWRTLNS(self):
-        o.write("WRTLNS")
+        self.o.write("WRTLNS" + '\n')
     
     def genMOV(self, src, dst):
-        o.write("MOV " + str(src) + " " + str(dst))
+        self.o.write("MOV " + str(src) + " " + str(dst) + '\n')
     
     def genADD(self, src1, src2, dst):
-        o.write("ADD " + str(src1) + " " + str(src2) + " " + str(dst))
+        self.o.write("ADD " + str(src1) + " " + str(src2) + " " + str(dst) + '\n')
     
     def genSUB(self, src1, src2, dst):
-        o.write("SUB " + str(src1) + " " + str(src2) + " " + str(dst))
+        self.o.write("SUB " + str(src1) + " " + str(src2) + " " + str(dst) + '\n')
     
     def genNEGF(self):
-        o.write("NEGF")
+        self.o.write("NEGF" + '\n')
     
     def genADDF(self):
-        o.write("ADDF")
+        self.o.write("ADDF" + '\n')
     
     def genSUBF(self):
-        o.write("SUBF")
+        self.o.write("SUBF" + '\n')
     
     def genMULF(self):
-        o.write("MULF")
+        self.o.write("MULF" + '\n')
     
     def genDIVF(self):
-        o.write("DIVF")
+        self.o.write("DIVF" + '\n')
     
     def genPUSH(self, location):
-        o.write("PUSH " + str(location))
+        self.o.write("PUSH " + str(location) + '\n')
     
     def genPOP(self, location):
-        o.write("POP " + str(location))
+        self.o.write("POP " + str(location) + '\n')
     
     def genNEGS(self):
-        o.write("NEGS")
+        self.o.write("NEGS" + '\n')
     
     def genADDS(self):
-        o.write("ADDS")
+        self.o.write("ADDS" + '\n')
     
     def genSUBS(self):
-        o.write("SUBS")
+        self.o.write("SUBS" + '\n')
     
     def genMULS(self):
-        o.write("MULS")
+        self.o.write("MULS" + '\n')
     
     def genDIVS(self):
-        o.write("DIVS")
+        self.o.write("DIVS" + '\n')
     
     def genMODS(self):
-        o.write("MODS")
+        self.o.write("MODS" + '\n')
     
     def genNEGSF(self):
-        o.write("NEGSF")
+        self.o.write("NEGSF" + '\n')
     
     def genADDSF(self):
-        o.write("ADDSF")
+        self.o.write("ADDSF" + '\n')
     
     def genSUBSF(self):
-        o.write("SUBSF")
+        self.o.write("SUBSF" + '\n')
     
     def genMULSF(self):
-        o.write("MULSF")
+        self.o.write("MULSF" + '\n')
     
     def genMODSF(self):
-        o.write("MODSF")
+        self.o.write("MODSF" + '\n')
     
     def genDIVSF(self):
-        o.write("DIVSF")
+        self.o.write("DIVSF" + '\n')
     
     def genCASTSI(self):
-        o.write("CASTSI")
+        self.o.write("CASTSI" + '\n')
     
     def genCASTSF(self):
-        o.write("CASTSF")
+        self.o.write("CASTSF" + '\n')
     
     def genANDS(self):
-        o.write("ANDS")
+        self.o.write("ANDS" + '\n')
     
     def genORS(self):
-        o.write("ORS")
+        self.o.write("ORS" + '\n')
     
     def genNOTS(self):
-        o.write("NOTS")
+        self.o.write("NOTS" + '\n')
     
     def genCMPEQS(self):
-        o.write("CMPEQS")
+        self.o.write("CMPEQS" + '\n')
     
     def genCMPGES(self):
-        o.write("CMPGES")
+        self.o.write("CMPGES" + '\n')
     
     def genCMPGTS(self):
-        o.write("CMPGTS")
+        self.o.write("CMPGTS" + '\n')
     
     def genCMPLES(self):
-        o.write("CMPLES")
+        self.o.write("CMPLES" + '\n')
     
     def genCMPLTS(self):
-        o.write("CMPLTS")
+        self.o.write("CMPLTS" + '\n')
     
     def genCMPNES(self):
-        o.write("CMPNES")
+        self.o.write("CMPNES" + '\n')
     
     def genCMPEQSF(self):
-        o.write("CMPEQSF")
+        self.o.write("CMPEQSF" + '\n')
     
     def genCMPGESF(self):
-        o.write("CMPGESF")
+        self.o.write("CMPGESF" + '\n')
     
     def genCMPGTSF(self):
-        o.write("CMPGTSF")
+        self.o.write("CMPGTSF" + '\n')
     
     def genCMPLESF(self):
-        o.write("CMPLESF")
+        self.o.write("CMPLESF" + '\n')
     
     def genCMPLTSF(self):
-        o.write("CMPLTSF")
+        self.o.write("CMPLTSF" + '\n')
     
     def genCMPNESF(self):
-        o.write("CMPNESF")
+        self.o.write("CMPNESF" + '\n')
     
     def genBRTS(self):
-        o.write("BRTS")
+        self.o.write("BRTS" + '\n')
     
     def genBRFS(self):
-        o.write("BRFS")
+        self.o.write("BRFS" + '\n')
     
     def genBR(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            o.write("BR " + nameRec['label'])
+            self.o.write("BR " + nameRec['label'] + '\n')
         else:
             self.semanticError("Called genBR with type other than LABEL")
     
     def label(self, label):
-        o.write(label + ':')
+        self.o.write(label + ':' + '\n')
     
     def genLabel(self):
         label = parser.getNextLabel()
@@ -291,8 +291,8 @@ class Analyzer:
             parCount = table.getParCount()
             if block == "program":
                 self.genComment(nameRec['scope'] + ' start')
-                o.write("SP #1 SP") # reserve space for old register value
-                o.write("SP #" + str(varCount) + " SP") # reserve space for variables in program
+                self.o.write("SP #1 SP" + '\n') # reserve space for old register value
+                self.o.write("SP #" + str(varCount) + " SP" + '\n') # reserve space for variables in program
                 register = 'D' + nameRec['nestingLevel']
                 offset = '-' + str(varCount + 1) + '(SP)'
                 self.genMOV(register, offset)
@@ -360,58 +360,58 @@ class Analyzer:
         self.genSUB('SP', '#' + str(paramSize + 1), 'SP')
     
     def genBEQ(self):
-        o.write("BEQ")
+        self.o.write("BEQ" + '\n')
     
     def genBGE(self):
-        o.write("BGE")
+        self.o.write("BGE" + '\n')
     
     def genBGT(self):
-        o.write("BGT")
+        self.o.write("BGT" + '\n')
     
     def genBLE(self):
-        o.write("BLE")
+        self.o.write("BLE" + '\n')
     
     def genBLT(self):
-        o.write("BLT")
+        self.o.write("BLT" + '\n')
     
     def genBNE(self):
-        o.write("BNE")
+        self.o.write("BNE" + '\n')
     
     def genBEQF(self):
-        o.write("BEQF")
+        self.o.write("BEQF" + '\n')
     
     def genBGEF(self):
-        o.write("BGEF")
+        self.o.write("BGEF" + '\n')
     
     def genBFTF(self):
-        o.write("BGTF")
+        self.o.write("BGTF" + '\n')
     
     def genBLEF(self):
-        o.write("BLEF")
+        self.o.write("BLEF" + '\n')
     
     def genBLTF(self):
-        o.write("BLTF")
+        self.o.write("BLTF" + '\n')
     
     def genBNEF(self):
-        o.write("BNEF")
+        self.o.write("BNEF" + '\n')
     
     def genCALL(self, label):
-        o.write("CALL " + str(label))
+        self.o.write("CALL " + str(label) + '\n')
     
     def genRET(self):
-        o.write("RET")
+        self.o.write("RET" + '\n')
     
     def genPRTS(self):
-        o.write("PRTS")
+        self.o.write("PRTS" + '\n')
     
     def genPRTR(self):
-        o.write("PRTR")
+        self.o.write("PRTR" + '\n')
     
     def genSPslot(self):
         self.genADD('SP', '#1', 'SP')
     
     def brUncond(self, label):
-        o.write('BR ' + str(label))
+        self.o.write('BR ' + str(label) + '\n')
     
     def genPushId(self, factor):
         factorClass = factor['classification']
@@ -868,4 +868,4 @@ class Analyzer:
                 self.semanticError(resultType + " doesn't have relOps")
     
     def genComment(self, comment):
-        o.write('\t ' + str(comment))
+        self.o.write('\t ' + str(comment) + '\n')
