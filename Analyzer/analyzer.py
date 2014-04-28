@@ -76,7 +76,7 @@ class Analyzer:
             r = self.getSemRecIdRow(rec)
             t = r['type']
         elif rec['type'] == recTypes.LITERAL:
-            t = rec['varType']
+            t = rec['type']
         else:
             self.semanticError("Record type: " + str(rec['type']) + " does not have a type.")
         return t
@@ -561,11 +561,11 @@ class Analyzer:
     def genMulOp(self, left, mulOp, right):
         results = []
         op = mulOp['tokenType']
-        if op == tokenTypes.MP_DIV_INT:
+        if op == tokenTypes.MP_DIV:
             self.checkTypesInt(left, right)
             self.genDIVS()
             resultType = varTypes.INTEGER
-        elif op == tokenTypes.MP_DIV:
+        elif op == tokenTypes.MP_FLOAT_DIVIDE:
             results = self.genCastDivision(left, right)
             resultType = self.getSemRecType(results[0])
             self.genDIVSF()

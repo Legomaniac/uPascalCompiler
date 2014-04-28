@@ -176,7 +176,7 @@ VariableDeclarationTail -> VariableDeclaration ";" VariableDeclarationTail
                         -> Lambda
 """
 def variableDeclarationTail():
-    if lookAhead.getType() == types.MP_VAR:
+    if lookAhead.getType() == types.MP_IDENTIFIER:
         variableDeclaration()
         match(types.MP_SCOLON)
         variableDeclarationTail()
@@ -836,8 +836,8 @@ def optionalActualParameterList(formalParams):
         lookAhead.getType() == types.MP_RPAREN or \
         lookAhead.getType() == types.MP_AND or \
         lookAhead.getType() == types.MP_MOD or \
+        lookAhead.getType() == types.MP_FLOAT_DIVIDE or \
         lookAhead.getType() == types.MP_DIV or \
-        lookAhead.getType() == types.MP_DIV_INT or \
         lookAhead.getType() == types.MP_TIMES or \
         lookAhead.getType() == types.MP_OR or \
         lookAhead.getType() == types.MP_MINUS or \
@@ -1155,7 +1155,7 @@ def factorTail(left):
     elif lookAhead.getType() == types.MP_AND or \
         lookAhead.getType() == types.MP_MOD or \
         lookAhead.getType() == types.MP_DIV or \
-        lookAhead.getType() == types.MP_DIV_INT or \
+        lookAhead.getType() == types.MP_FLOAT_DIVIDE or \
         lookAhead.getType() == types.MP_TIMES:
             thisMulOp = multiplyingOperator()
             thisFactor = factor(None)
@@ -1179,12 +1179,12 @@ def multiplyingOperator():
     if lookAhead.getType() == types.MP_TIMES:
         match(types.MP_TIMES)
         thisMulOp = {'type':recTypes.MUL_OP, 'tokenType':types.MP_TIMES}
+    elif lookAhead.getType() == types.MP_FLOAT_DIVIDE:
+        match(types.MP_FLOATE_DIVIDE)
+        thisMulOp = {'type':recTypes.MUL_OP, 'tokenType':types.MP_FLOAT_DIVIDE}
     elif lookAhead.getType() == types.MP_DIV:
         match(types.MP_DIV)
         thisMulOp = {'type':recTypes.MUL_OP, 'tokenType':types.MP_DIV}
-    elif lookAhead.getType() == types.MP_DIV_INT:
-        match(types.MP_DIV_INT)
-        thisMulOp = {'type':recTypes.MUL_OP, 'tokenType':types.MP_DIV_INT}
     elif lookAhead.getType() == types.MP_MOD:
         match(types.MP_MOD)
         thisMulOp = {'type':recTypes.MUL_OP, 'tokenType':types.MP_MOD}
