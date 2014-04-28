@@ -547,7 +547,7 @@ ReadParameter -> VariableIdentifier
 def readParameter():
     if lookAhead.getType() == types.MP_IDENTIFIER:
         iden = variableIdentifier()
-        symbolvar = analyzer.findSymbol(iden)
+        symbolvar = analyzer.findSymbol(iden, None)
         readRecord = {'type':recTypes.IDENTIFIER, 'classification':symbolvar['classification'], 'controlId':iden}
         if symbolvar['classification'] == classification.VARIABLE:
             analyzer.genRead(readRecord, True)
@@ -718,7 +718,7 @@ def forStatement():
     if lookAhead.getType() == types.MP_FOR:
         match(types.MP_FOR)
         controlIdentifier = controlVariable()
-        controlSymbol = analyzer.findSymbol(controlIdentifier)
+        controlSymbol = analyzer.findSymbol(controlIdentifier, None)
         controlRec = {'type':recTypes.IDENTIFIER, 'classification':controlSymbol['classification'], 'controlId':controlIdentifier}
         match(types.MP_ASSIGN)
         exp = initialValue()
@@ -1208,7 +1208,7 @@ Factor -> UnsignedInteger
 def factor(formalParam):
     factorRec = None
     if lookAhead.getType() == types.MP_IDENTIFIER:
-        factorVar = analyzer.findSymbol(lookAhead.getLexeme())
+        factorVar = analyzer.findSymbol(lookAhead.getLexeme(), None)
         if factorVar is not None:
             if factorVar['classification'] == classification.VARIABLE or factorVar['classification'] == classification.PARAMETER:
                 varId = variableIdentifier()

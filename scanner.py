@@ -17,7 +17,7 @@ COMMENT_CHAR = "{"
 def initialize(sourceTextArg): 
     global sourceText, lastIndex, sourceIndex, lineIndex, colIndex 
     sourceText = str(sourceTextArg) 
-    lastIndex    = len(sourceText)
+    lastIndex    = len(sourceText) -1
     sourceIndex  = 0
     lineIndex    =  0
     colIndex     = 0
@@ -39,7 +39,7 @@ def getToken():
 
 def getNextToken():
     foundToken = None
-    if lastLine() and hasNextChar is False:
+    if eof() and hasNextChar() is False:
         foundToken = Token(types.MP_EOF, "EOF", lineIndex, colIndex)
     else:
         nextChar = getCurChar()
@@ -57,9 +57,9 @@ def getNextToken():
             foundToken = fsa.CommentFSA()
         if foundToken is None:
             nextChar = getNextChar()
-            Token(types.MP_ERROR, str(nextChar['lexeme']), nextChar['lineIndex'], nextChar['colIndex'] -1)
-        print "Token found: " + foundToken.getLexeme() + ", type: " + str(foundToken.getType())
-        return foundToken
+            foundToken = Token(types.MP_ERROR, str(nextChar['lexeme']), nextChar['lineIndex'], nextChar['colIndex'] -1)
+        #print "Token found: " + foundToken.getLexeme() + ", type: " + str(foundToken.getType())
+    return foundToken
 #--------------------------------------------------
 #Always have to look one ahead of current position
 #--------------------------------------------------
@@ -70,12 +70,12 @@ def getNextChar():
     global lastIndex, sourceIndex, lineIndex, colIndex
     char = getCurChar()
     sourceIndex += 1
-    if sourceIndex > 0:
+    colIndex += 1
+    if sourceIndex > 0 and hasNextChar():
         while sourceText[sourceIndex] == "\n":
             lineIndex += 1
             colIndex  = 0
             sourceIndex += 1
-    colIndex += 1
     return char
 
 def getCurChar():
@@ -86,8 +86,8 @@ def getCurChar():
     char = {'lexeme':lex, 'lineIndex':lineIndex, 'colIndex':colIndex, 'sourceIndex':sourceIndex}
     return char
 
-def lastLine(): 
-    if sourceIndex == lastIndex:
+def eof():
+    if sourceIndex > lastIndex:
         return True
     else:
         return False
@@ -99,5 +99,6 @@ def hasNextChar():
         return False
 
 def setIndexes(col, src):
-    colIndex = index
+    global colIndex, sourceIndex
+    colIndex = col
     sourceIndex = sourceIndex + src

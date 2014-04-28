@@ -15,6 +15,8 @@ class Analyzer:
     def __init__(self, tables):
         global symbolTables, o
         o = open('../output.up', 'w')
+        if o.closed:
+            print "ERROR: Output file not opened properly..."
         symbolTables = tables
         
     # --------------------------------------------------------------
