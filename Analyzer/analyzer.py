@@ -349,7 +349,6 @@ class Analyzer:
     Generate Function(Procedure) Deactivation Record
     """
     def genFuncDR(self, nameRec):
-        print nameRec
         self.genProcDR(nameRec)
     
     """
@@ -367,7 +366,6 @@ class Analyzer:
     """
     def genFuncCall(self, funcRec):
         row = self.getSemRecIdRow(funcRec)
-        print "Gen Func Call: " + str(row)
         label = row['branch']['label']
         self.genCALL(label)
         paramSize = len(row['attributes'])
@@ -745,8 +743,6 @@ class Analyzer:
         actualParamType = self.getSemRecType(expression)
         formalParamType = formalParam['formalType']
         formalParamMode = formalParam['formalMode']
-        print formalParamType
-        print formalParamMode
         if expression['type'] == recTypes.LITERAL:
             if formalParamMode == mode.VALUE:
                 if actualParamType != formalParamType:
