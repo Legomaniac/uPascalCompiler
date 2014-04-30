@@ -72,7 +72,6 @@ class Analyzer:
     # --------------------------------------------------------------
     def getSemRecType(self, rec):
         t = None
-        print rec
         if rec['type'] == recTypes.IDENTIFIER:
             r = self.getSemRecIdRow(rec)
             t = r['type']
@@ -556,7 +555,7 @@ class Analyzer:
             arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
             arrayRec.append(right)
         elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
-            self.genCASTSI()
+            self.genCASTSF()
             arrayRec.append(left)
             arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
         else:
