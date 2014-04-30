@@ -118,7 +118,7 @@ def program():
         analyzer.genBR(record)
         block(scopeName, {'type':recTypes.BLOCK, 'label':'program'}, record)
         match(types.MP_PERIOD)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestingLevel':'' + str(symbolTables[-1].getNestingLevel()), 'tblsize':'' + str(symbolTables[-1].getTableSize())}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':str(symbolTables[-1].getScopeName()), 'nestinglvl':str(symbolTables[-1].getNestingLevel()), 'tblsize':str(symbolTables[-1].getTableSize())}
         analyzer.genProgDR(nameRecord)
         printSymbolTables()
         removeSymbolTable("program")
@@ -146,7 +146,7 @@ def block(scope, blockType, label):
         lookAhead.getType() == types.MP_PROCEDURE or \
         lookAhead.getType() == types.MP_VAR:
             variableDeclarationPart()
-            nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':scope, 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
+            nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':str(scope), 'nestinglvl':str(symbolTables[-1].getNestingLevel()), 'tblsize':str(symbolTables[-1].getTableSize())}
             procedureAndFunctionDeclarationPart()
             analyzer.genSpecLabel(label)
             analyzer.genActRec(nameRecord, blockType)
@@ -250,7 +250,7 @@ def procedureDeclaration():
         match(types.MP_SCOLON)
         block(procedureID, {'type':recTypes.BLOCK, 'label':"procedure"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':''+symbolTables[-1].getScopeName(), 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':str(symbolTables[-1].getScopeName()), 'nestinglvl':str(symbolTables[-1].getNestingLevel()), 'tblsize':str(symbolTables[-1].getTableSize())}
         analyzer.genProcDR(nameRecord)
         print "Popping Procedure Table..."
         printSymbolTables()
@@ -265,15 +265,16 @@ def functionDeclaration():
     lbl = getNextLabel()
     branchLbl = {'type':recTypes.LABEL, 'label':lbl}
     if lookAhead.getType() == types.MP_FUNCTION:
+        print 
         functionID = functionHeading(branchLbl)
         match(types.MP_SCOLON)
         block(functionID, {'type':recTypes.BLOCK, 'label':"function"}, branchLbl)
         match(types.MP_SCOLON)
-        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':+symbolTables[-1].getScopeName(), 'nestingLevel':''+str(symbolTables[-1].getNestingLevel()), 'tblsize':''+str(symbolTables[-1].getTableSize())}
+        nameRecord = {'type':recTypes.SYMBOL_TABLE, 'scope':str(symbolTables[-1].getScopeName()), 'nestinglvl':str(symbolTables[-1].getNestingLevel()), 'tblsize':str(symbolTables[-1].getTableSize())}
         analyzer.genFuncDR(nameRecord)
         print "Popping Function Table..."
-        printSymbolTables("function")
-        removeSymbolTable()
+        printSymbolTables()
+        removeSymbolTable("function")
         row = analyzer.findSymbol(functionID, classification.FUNCTION)
         if row['returnValue'] is False:
             semanticError("Function: " + str(functionID) + " is missing return value")
@@ -295,7 +296,7 @@ def procedureHeading(branchLbl):
             attributes.append(p['attribute'])
             ids.append(p['lexeme'])
         symbolTables[-1].addModuleSymbolsToTable(classification.PROCEDURE, procID, None, attributes, branchLbl)
-        addSymbolTable(procID, branchLbl['type'])
+        addSymbolTable(procID, branchLbl['label'])
         symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
         symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, ["Caller's Return Address"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
@@ -306,11 +307,10 @@ def procedureHeading(branchLbl):
 Rule 20:
 FunctionHeading -> "function" functionIdentifier OptionalFormalParameterList ":" Type
 """
-def functionHeading():
+def functionHeading(branchLbl):
     funcID = None
     attributes = []
     ids = []
-    branchLbl = {'type':recTypes.LABEL, 'label':"lbl"}
     if lookAhead.getType() == types.MP_FUNCTION:
         match(types.MP_FUNCTION)
         funcID = functionIdentifier()
@@ -321,7 +321,7 @@ def functionHeading():
         match(types.MP_COLON)
         t = Type()
         symbolTables[-1].addModuleSymbolsToTable(classification.FUNCTION, funcID, t, attributes, branchLbl)
-        addSymbolTable(funcID, branchLbl['type'])
+        addSymbolTable(funcID, branchLbl['label'])
         symbolTables[-1].addDataSymbolsToTable(classification.DISREG, ["Old Display Register Value"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
         symbolTables[-1].addDataSymbolsToTable(classification.PARAMETER, ids, attributes)
         symbolTables[-1].addDataSymbolsToTable(classification.RETADDR, ["Caller's Return Address"], [{'type':varTypes.STRING, 'mode':mode.VALUE}])
@@ -334,7 +334,7 @@ OptionalFormalParameterList -> "(" FormalParameterSection FormalParameterSection
                             -> Lambda
 """
 def optionalFormalParameterList():
-    parameters = None
+    parameters = {}
     if lookAhead.getType() == types.MP_LPAREN:
         match(types.MP_LPAREN)
         parameters = formalParameterSection()
@@ -619,7 +619,7 @@ AssignmentStatement -> VariableIdentifier ":=" Expression
                     -> FunctionIdentifier ":=" Expression
 """
 def assignmentStatement():
-    symTableRec = {'type':recTypes.SYMBOL_TABLE, 'scope':symbolTables[-1].getScopeName(), 'nestinglvl':'' + str(symbolTables[-1].getNestingLevel()), 'tblsize':'' + str(symbolTables[-1].getTableSize())}
+    symTableRec = {'type':recTypes.SYMBOL_TABLE, 'scope':str(symbolTables[-1].getScopeName()), 'nestinglvl':str(symbolTables[-1].getNestingLevel()), 'tblsize':str(symbolTables[-1].getTableSize())}
     if lookAhead.getType() == types.MP_IDENTIFIER:
         assign = analyzer.findSymbol(lookAhead.getLexeme(), None)
         if assign == None:
@@ -816,7 +816,7 @@ def procedureStatement():
         row = analyzer.findSymbol(procID, classification.PROCEDURE)
         if row is not None:
             formalParams = {'name':procID, 'attributes':row['attributes'], 'pointer':0}
-            procRec = {'type':recTypes.IDENTIFIER, 'classification':classification.PROCEDURE, 'procId':procID}
+            procRec = {'type':recTypes.IDENTIFIER, 'classification':classification.PROCEDURE, 'controlId':procID}
             analyzer.genComment("call to " + procID + " start")
             analyzer.genSPslot()
             optionalActualParameterList(formalParams)
@@ -1223,12 +1223,12 @@ def factor(formalParam):
                 analyzer.genComment("call to " + funcId + " start")
                 analyzer.genSPslot() # reserve space for return value
                 analyzer.genSPslot() # reserve space for the register slot
-                formalParams = {'name':funcId, 'attributes':factorVar['attributes']}
+                formalParams = {'name':funcId, 'attributes':factorVar['attributes'], 'pointer':0}
                 optionalActualParameterList(formalParams)
-                funcRec = {'type':recTypes.IDENTIFIER, 'classification':classification.FUNCTION, 'funcId':funcId}
+                funcRec = {'type':recTypes.IDENTIFIER, 'classification':classification.FUNCTION, 'controlId':funcId}
                 analyzer.genFuncCall(funcRec)
                 analyzer.genComment("call to " + funcId + " end")
-                factorRec = {'type':recTypes.LITERAL, 'factorVar':factorVar['type']}
+                factorRec = {'type':recTypes.LITERAL, 'varType':factorVar['type']}
             else:
                 semanticError("Cannot use proc identifier '" + lookAhead.getLexeme() + "' as factor")
         else:

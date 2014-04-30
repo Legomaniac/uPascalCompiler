@@ -83,7 +83,7 @@ class SymbolTable:
             att = attributes
             attributes = []
             for i in range(len(ids)):
-                attributes.append(att)
+                attributes.append(att[0])
         for i in range(len(ids)):
             attribute = attributes[i]
             lex = ids[i]

@@ -72,6 +72,7 @@ class Analyzer:
     # --------------------------------------------------------------
     def getSemRecType(self, rec):
         t = None
+        print rec
         if rec['type'] == recTypes.IDENTIFIER:
             r = self.getSemRecIdRow(rec)
             t = r['type']
@@ -299,7 +300,7 @@ class Analyzer:
                 self.genComment(nameRec['scope'] + ' start')
                 self.genADD('SP', '#1', 'SP') # reserve space for old register value
                 self.genADD('SP', '#' + str(varCount), 'SP') # reserve space for variables in program
-                register = 'D' + nameRec['nestingLevel']
+                register = 'D' + nameRec['nestinglvl']
                 offset = '-' + str(varCount + 1) + '(SP)'
                 self.genMOV(register, offset)
                 self.genSUB("SP", "#" + str(varCount + 1), register)
@@ -307,7 +308,7 @@ class Analyzer:
             elif block == "procedure" or block == "function":
                 self.genComment(nameRec['scope'] + ' start')
                 self.genADD('SP', '#' + str(varCount), 'SP') # reserve space for variables in program
-                register = 'D' + nameRec['nestingLevel']
+                register = 'D' + nameRec['nestinglvl']
                 offset = '-' + str(varCount + parCount + 2) + '(SP)' # slot for both return address and old register value
                 self.genMOV(register, offset)
                 self.genSUB("SP", "#" + str(varCount + parCount + 2), register)
@@ -323,7 +324,7 @@ class Analyzer:
     def genProgDR(self, nameRec):
         table = self.findSymbolTable(nameRec['scope'])
         varCount = table.getVarCount()
-        register = 'D' + nameRec['nestingLevel']
+        register = 'D' + nameRec['nestinglvl']
         offset = '-' + str(varCount + 1) + '(SP)'
         self.genComment('deactivation start')
         self.genMOV(offset, register)
@@ -334,23 +335,30 @@ class Analyzer:
     Generate Procedure Deactivation Record
     """
     def genProcDR(self, nameRec):
-        table = self.findSymbolTable(nameRec['label'])
+        table = self.findSymbolTable(nameRec['scope'])
         varCount = table.getVarCount()
         parCount = table.getParCount()
         register = 'D' + nameRec['nestinglvl']
-        offset = '-' + (varCount + parCount + 2) + '(SP)'
+        offset = '-' + str(varCount + parCount + 2) + '(SP)'
         self.genComment('deactivation start')
         self.genMOV(offset, register)
-        self.genSUB('SP', '#' + (varCount), 'SP')
-        self.ret()
-        self.genComment(nameRec['label'] + ' end')
+        self.genSUB('SP', '#' + str(varCount), 'SP')
+        self.genRET()
+        self.genComment(nameRec['scope'] + ' end')
+    
+    """
+    Generate Function(Procedure) Deactivation Record
+    """
+    def genFuncDR(self, nameRec):
+        print nameRec
+        self.genProcDR(nameRec)
     
     """
     Generate Procedure Call
     """
     def genProcCall(self, procRec):
         row = self.getSemRecIdRow(procRec)
-        label = row['branch']
+        label = row['branch']['label']
         self.genCALL(label)
         paramSize = len(row['attributes'])
         self.genSUB('SP', '#' + str(paramSize + 1), 'SP')
@@ -360,7 +368,8 @@ class Analyzer:
     """
     def genFuncCall(self, funcRec):
         row = self.getSemRecIdRow(funcRec)
-        label = row['branch']
+        print "Gen Func Call: " + str(row)
+        label = row['branch']['label']
         self.genCALL(label)
         paramSize = len(row['attributes'])
         self.genSUB('SP', '#' + str(paramSize + 1), 'SP')
@@ -775,8 +784,8 @@ class Analyzer:
             self.genPOP(leftOffset)
         elif leftRow['classification'] == classification.FUNCTION:
             funcRow = leftRow
-            nestingLevel = symTable['nestingLevel']
-            register = 'D' + idRec['nestingLevel']
+            nestingLevel = symTable['nestinglvl']
+            register = 'D' + nestingLevel
             offset = '-1(' + register + ')'
             self.genPOP(offset)
             funcRow['returnValue'] = True
