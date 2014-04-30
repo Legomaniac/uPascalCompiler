@@ -533,20 +533,20 @@ class Analyzer:
         rightType = self.getSemRecType(right)
         arrayRec = []
         if leftType == rightType:
-            arrayRec[0] = left
-            arrayRec[1] = right
+            arrayRec.append(left)
+            arrayRec.append(right)
         elif leftType == varTypes.INTEGER and rightType == varTypes.FLOAT:
             self.genComment("start cast left to float")
             self.genSUB('SP', '#1', 'SP') # move to the left variable on stack
             self.genCASTSF()
             self.genADD('SP', '#1', 'SP') # move back
             self.genComment("end cast left to float")
-            arrayRec[0] = {'type':recTypes.LITERAL, 'varType':varTypes.FLOAT}
-            arrayRec[1] = right
+            arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
+            arrayRec.append(right)
         elif leftType == varTypes.FLOAT and rightType == varTypes.INTEGER:
             self.genCASTSI()
-            arrayRec[0] = left
-            arrayRec[1] = {'type':recTypes.LITERAL, 'varType':varTypes.FLOAT}
+            arrayRec.append(left)
+            arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
         else:
             self.semanticError("Invalid casting from " + rightType + " to " + leftType)
             return None
@@ -593,7 +593,7 @@ class Analyzer:
                     self.semanticError(op + " is not a mult op for type: " + resultType)
             else:
                 self.semanticError(resultType + " does not have a mult op")
-        return {'type':recTypes.LITERAL, 'resultType':resultType}
+        return {'type':recTypes.LITERAL, 'varType':resultType}
     
     def genAddOp(self, left, addOp, right):
         results = self.genCast(left, right)
@@ -620,7 +620,7 @@ class Analyzer:
                 self.semanticError(op + " is not an addOp for type: " + resultType)
         else:
             self.semanticError(resultType + " does not have adding operation")
-        return {'type':recTypes.LITERAL, 'resultType':resultType}
+        return {'type':recTypes.LITERAL, 'varType':resultType}
     
     def genOptSimNeg(self, opSign, term):
         if opSign is not None and term is not None:
