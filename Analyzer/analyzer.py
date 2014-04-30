@@ -82,7 +82,10 @@ class Analyzer:
         return t
     
     def getSemRecIdRow(self, rec):
-        lex = rec['lexeme']
+        if "lexeme" in rec:
+            lex = rec['lexeme']
+        else:
+            lex = rec['controlId']
         c = rec['classification']
         r = self.findSymbol(lex, c)
         if r is None:
