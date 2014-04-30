@@ -745,6 +745,8 @@ class Analyzer:
         actualParamType = self.getSemRecType(expression)
         formalParamType = formalParam['formalType']
         formalParamMode = formalParam['formalMode']
+        print formalParamType
+        print formalParamMode
         if expression['type'] == recTypes.LITERAL:
             if formalParamMode == mode.VALUE:
                 if actualParamType != formalParamType:

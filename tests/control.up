@@ -1,0 +1,32 @@
+program control;
+    var a, b, c : integer;
+        x, y, z : float;
+        isIs, hasHas : boolean;
+        s : string;
+    
+    function lessThan(a, b: integer) : boolean;
+    begin
+        if (a < b) then
+        begin
+            Write('A is less than B\n');
+            lessThan := true;
+        end
+        else
+        begin
+            Write('A is greater than or equal to B\n');
+            lessThan := false;
+        end;
+    end;
+begin
+    a := -5;
+    c := -87;
+    b := a + c;
+    if (lessThan(a, b)) then
+    begin
+        Write('a: ', a, '; < b: ', b, '\n');
+    end;
+    for a := a to 10 do
+     begin
+       writeln(a);
+     end;
+end.

@@ -802,7 +802,7 @@ def finalValue():
         lookAhead.getType() == types.MP_INTEGER_LIT or \
         lookAhead.getType() == types.MP_MINUS or \
         lookAhead.getType() == types.MP_PLUS:
-            expr = ordinalExpression()
+            expr = ordinalExpression(None)
     else:
         syntaxError("identifier, false, true, String, Float, (, not, Integer, -, +")
     return expr
@@ -901,7 +901,7 @@ def actualParameter(formalParams):
             formalParam = formalParams['attributes'][pointer]
             formalParams['pointer'] = pointer + 1
             if formalParam is not None:
-                expr = ordinalExpression()
+                expr = ordinalExpression(None)
                 analyzer.genParamCast(expr, {'type':recTypes.FORMAL_PARAM, 'formalType':formalParam['type'], 'formalMode':formalParam['mode']})
             else:
                 semanticError("Too many parameters for: " + formalParams['name'])
