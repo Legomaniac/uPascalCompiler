@@ -3,7 +3,7 @@ program Program2;
     Fred : integer;
     X : integer;
   begin
-    Apples := 0;
+    Apples := 2;
     X := 10;
     Fred := Apples + Apples * X;
     Write('Apples = ', Apples, '; X = ', X,' and Fred = ', Fred)

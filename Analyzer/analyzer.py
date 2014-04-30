@@ -76,7 +76,7 @@ class Analyzer:
             r = self.getSemRecIdRow(rec)
             t = r['type']
         elif rec['type'] == recTypes.LITERAL:
-            t = rec['type']
+            t = rec['varType']
         else:
             self.semanticError("Record type: " + str(rec['type']) + " does not have a type.")
         return t
@@ -432,7 +432,7 @@ class Analyzer:
             elif paramMode == mode.VARIABLE:
                 self.genComment("push param class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + offset)
                 self.genPUSH('@' + str(offset))
-        return {'type':recTypes.LITERAL, 'rowType':rowData['type']}
+        return {'type':recTypes.LITERAL, 'varType':rowData['type']}
     
     def genPushIdWithFormalParam(self, factor, formalParamRec):
         returnVal = None
@@ -457,18 +457,18 @@ class Analyzer:
             if formalParamMode == mode.VALUE:
                 if actualParamMode == mode.VALUE:
                     offset = self.generateOffset(table, rowData)
-                    returnVal = {'type':recTypes.LITERAL, 'rowType':rowData['type']}
+                    returnVal = {'type':recTypes.LITERAL, 'varType':rowData['type']}
                     self.genComment("push class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + offset)
                     self.genPUSH(offset)
                 elif actualParamMode == mode.VARIABLE:
                     if varClass:
                         offset = self.generateOffset(table, rowData)
-                        returnVal = {'type':recTypes.LITERAL, 'rowType':rowData['type']}
+                        returnVal = {'type':recTypes.LITERAL, 'varType':rowData['type']}
                         self.genComment("push class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + offset)
                         self.genPUSH(offset)
                     else:
                         offset = '@' + self.generateOffset(table, rowData)
-                        returnVal = {'type':recTypes.LITERAL, 'rowType':rowData['type']}
+                        returnVal = {'type':recTypes.LITERAL, 'varType':rowData['type']}
                         self.genComment("push class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + offset)
                         self.genPUSH(offset)
             elif formalParamMode == mode.VARIABLE:

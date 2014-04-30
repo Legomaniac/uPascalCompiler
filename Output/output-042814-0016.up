@@ -1,0 +1,7 @@
+BR L1
+L1:
+ADD SP #1 SP
+ADD SP #3 SP
+MOV D0 -4(SP)
+SUB SP #4 D0
+PUSH #2
