@@ -1,0 +1,21 @@
+program mathTest;
+var a, b, c, d, e, f: integer;
+begin
+b := 2;
+c := 5;
+a := b + c;
+d := c - b;
+e := b * a;
+f := c*d;
+writeln ('e = ', e, ': should be 14');
+writeln ('f = ', f, ': should be 15');
+writeln ('a = ', a, ': should be 7');
+a := e mod f;
+writeln ('a = ', a, ': should be 14');
+writeln ('b = ', b, ': should be 2');
+b := a div b;
+writeln ('b = ', b, ': should be 7');
+writeln ('c = ', c, ': should be 5');
+c := f div c * b;
+writeln ('c = ', c, ': should be 21');
+end.

@@ -11,6 +11,7 @@ def IdentifierFSA():
     state = 1
     lex = ""
     current = scanner.getCurChar()
+    curLine = current['lineIndex']
     while state != 4:
         if scanner.hasNextChar() is False and state == 2:
             state = 4
@@ -30,7 +31,7 @@ def IdentifierFSA():
                     return Token(types.MP_ERROR, str(current['lexeme']), current['lineIndex'], current['colIndex'] -1)
             elif state == 2:
                 current = scanner.getCurChar()
-                if current['lexeme'] in string.letters or current['lexeme'] in string.digits:
+                if (current['lexeme'] in string.letters or current['lexeme'] in string.digits) and current['lineIndex'] == curLine:
                     current = scanner.getNextChar()
                     state = 2
                     lex += current['lexeme']
@@ -145,10 +146,10 @@ def NumbersFSA():
                     state = 5
                     lex += current['lexeme']
                 else:
-                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                     return token
             else:
-                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                 return token
         elif state == 4:
             if scanner.hasNextChar():
@@ -157,10 +158,10 @@ def NumbersFSA():
                     state = 7
                     lex += current['lexeme']
                 else:
-                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                     return token
             else:
-                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                 return token
         elif state == 5:
             if scanner.hasNextChar():
@@ -183,10 +184,10 @@ def NumbersFSA():
                     state = 5
                     lex += current['lexeme']
                 else:
-                    scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                    scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                     return token
             else:
-                scanner.setIndexes(token.getColNumber() + len(lex) -1, len(lex) -1)
+                scanner.setIndexes(token.getColNumber() + len(lex), len(lex))
                 return token
         elif state == 7:
             if scanner.hasNextChar():
@@ -263,6 +264,7 @@ def CommentFSA():
                 if scanner.hasNextChar():
                     current = scanner.getCurChar()
                     if current['lexeme'] == "}":
+                        current = scanner.getNextChar()
                         openBraceCount -= 1
                         if openBraceCount == 0:
                             state = 3
@@ -276,7 +278,7 @@ def CommentFSA():
                         lex += char['lexeme']
                 else:
                     return Token(types.MP_RUN_COMMENT, lex, startingLine, startingCol)
-    return Token(types.COMMENT, lex, startingLine, startingCol)
+    return Token(types.MP_COMMENT, lex, startingLine, startingCol)
 
 """FSA for Symbols"""
 def SymbolFSA():
@@ -333,11 +335,11 @@ def SymbolFSA():
                 current = scanner.getCurChar()
                 if current['lexeme'] == ">":
                     current = scanner.getNextChar()
-                    lex += current
+                    lex += current['lexeme']
                     state = 14
                 elif current['lexeme'] == "=":
                     current = scanner.getNextChar()
-                    lex += current
+                    lex += current['lexeme']
                     state = 15
                 else:
                     state = 18
@@ -388,7 +390,7 @@ def SymbolFSA():
     elif lex == "*":
         thisType = types.MP_TIMES
     elif lex == "/":
-        thisType = types.MP_DIV
+        thisType = types.MP_FLOAT_DIVIDE
     elif lex == ":":
         thisType = types.MP_COLON
 

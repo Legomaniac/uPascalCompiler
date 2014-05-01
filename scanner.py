@@ -16,11 +16,11 @@ COMMENT_CHAR = "{"
   
 def initialize(sourceTextArg): 
     global sourceText, lastIndex, sourceIndex, lineIndex, colIndex 
-    sourceText = str(sourceTextArg) 
-    lastIndex    = len(sourceText) -1
-    sourceIndex  = 0
-    lineIndex    =  0
-    colIndex     = 0
+    sourceText = str(sourceTextArg)
+    lastIndex = len(sourceText)
+    sourceIndex = 0
+    lineIndex = 0
+    colIndex = 0
 
 def checkScanError(curToken):
     if curToken.getType() == types.MP_RUN_COMMENT:
@@ -43,6 +43,7 @@ def getNextToken():
         foundToken = Token(types.MP_EOF, "EOF", lineIndex, colIndex)
     else:
         nextChar = getCurChar()
+        #print "SourceIndex: " + str(sourceIndex) + ", LastIndex: " + str(lastIndex) + ", Char: " + str(sourceText[sourceIndex])
         if nextChar['lexeme'] in IDENTIFIER_CHARS:
             foundToken = fsa.IdentifierFSA()
         elif nextChar['lexeme'] in NUMBER_CHARS:
@@ -71,11 +72,10 @@ def getNextChar():
     char = getCurChar()
     sourceIndex += 1
     colIndex += 1
-    if sourceIndex > 0 and hasNextChar():
-        while sourceText[sourceIndex] == "\n":
-            lineIndex += 1
-            colIndex  = 0
-            sourceIndex += 1
+    while hasNextChar() and sourceText[sourceIndex] == "\n":
+        lineIndex += 1
+        colIndex  = 0
+        sourceIndex += 1
     return char
 
 def getCurChar():
@@ -87,13 +87,13 @@ def getCurChar():
     return char
 
 def eof():
-    if sourceIndex > lastIndex:
+    if sourceIndex == lastIndex:
         return True
     else:
         return False
 
 def hasNextChar():
-    if sourceIndex <= lastIndex:
+    if sourceIndex < lastIndex:
         return True
     else:
         return False
@@ -101,4 +101,4 @@ def hasNextChar():
 def setIndexes(col, src):
     global colIndex, sourceIndex
     colIndex = col
-    sourceIndex = sourceIndex + src
+    sourceIndex += src

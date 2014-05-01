@@ -1,0 +1,101 @@
+{boolean test
+	Output:
+	0
+	1
+	0
+	1
+	0
+	1
+	1
+	10
+	1
+	10
+	10
+	1
+	1
+	1
+	1
+
+	
+}
+program ifTest;
+var a, b: integer;
+begin
+
+    a := 1;
+    b := 10;
+
+
+    {write Expression -> Simple Expression OptionalRelationalPart}
+       {write Epression -> SimpleExpression RelationalOperator SimpleExpression}
+            {write Epression -> SimpleExpression "=" SimpleExpression}
+        writeln('a = b is ', a = b, ': should be FALSE');
+    {writeln();}
+            {write Epression -> SimpleExpression "<" SimpleExpression}
+        write('a < b is ', a < b, ': should be TRUE');
+    {writeln();}
+            {write Epression -> SimpleExpression ">" SimpleExpression}
+        write( 'a > b is ', a > b, ': should be FALSE');
+    {writeln();}
+            {write Epression -> SimpleExpression "<=" SimpleExpression}
+        write('a <= b is ', a <= b, ': should be TRUE');
+    {writeln();}
+            {write Epression -> SimpleExpression ">=" SimpleExpression}
+        write('a >= b is ', a >= b, ': should be FALSE');
+    {writeln();}	
+        {write Epression -> SimpleExpression "<>" SimpleExpression}
+        write('a <> b', a <> b, 'is ', a <> b, ': should be TRUE');
+
+    if (a < b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a < b = ', a < b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a < b = ', a < b, ': should be FALSE');
+
+    if (a > b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a > b = ', a > b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a > b = ', a > b, ': should be FALSE');
+
+    if (a <= b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a <= b = ', a <= b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a <= b = ', a <= b, ': should be FALSE');
+
+    if (a >= b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a >= b = ', a >= b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a >= b = ', a >= b, ': should be FALSE');
+
+    if (a = b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a = b = ', a = b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a = b = ', a = b, ': should be FALSE');
+
+    if (a <> b) then
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a <> b = ', a <> b, ': should be TRUE')
+    else
+        writeln('a = ', a, ' and b = ', b, ' and ', 'a <> b = ', a <> b, ': should be FALSE'); 
+
+    {Boolean operations with complex expressions}
+    if ( 1+8 > 8 ) then
+        writeln('TRUE: should be TRUE')
+    else
+        writeln('FALSE: should be TRUE');
+
+
+
+    if ( 20 mod 4 * 5 = 0 ) then
+        write(1)
+    else
+        write(0);
+
+    {writeln();}
+
+    if ((20+4) div (3+3) > -10000 mod (63+14)) then
+        write(1)
+    else
+        write(0);
+    {writeln();}
+
+
+end.

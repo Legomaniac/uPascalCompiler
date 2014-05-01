@@ -1,0 +1,18 @@
+program writeTest;
+var a, b, c, d, e : integer;
+    x, y, z: float;
+
+begin
+
+        writeln ( 100.0, ': should be 100.0' );
+
+        a := 5;
+        x := 10.0;
+        y := 2.0;
+        
+        writeln ('x = ', x, ': should be 10.0');
+        writeln ('x/y = ', x/y, ': should be 5.0');
+        writeln ('x/y*4 =', x/y*4, ': should be 20.0');
+        {writeln ('a/b = ', a/b, ': should be parse error');}
+
+end.

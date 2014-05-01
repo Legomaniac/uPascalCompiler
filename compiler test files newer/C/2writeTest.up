@@ -1,0 +1,74 @@
+program writeTest;
+var a, b, c, d, e : integer;
+
+begin
+
+
+
+        {single read}
+        writeln ('input 5');
+        read(a); {input 5}
+
+        {multi read}
+        writeln('input 10, 20, 4, and 100 (without the commas)');
+        read(b,c,d,e); 
+{END READ STATEMENT}
+
+
+
+{WRITE STATEMENT}
+
+        {write Factor -> unsigned int}
+        writeln ( 100, ': should be 100' );
+
+        {write Factor -> variable identifier}
+        writeln ('a = ', a, ': should be 5');
+
+        {write Factor ->'(' Expression ')' }
+        writeln ( (100), ': should be 100' );
+
+        {write Term -> Factor FactorTail}
+                {write Term -> Factor      see the above operations}
+                {write Term -> Factor MutiplyingOperator Factor FactorTail}
+                        {write Term -> Factor '*' Factor FactorTail}
+                        writeln ( a * b, ': should be 50' );
+
+                        {write Term -> Factor 'div' Factor FactorTail}
+                        writeln ( c div d, ': should be 5' );
+
+                        {write Term -> Factor 'mod' Factor FactorTail}
+                        writeln ( a mod e, ': should be 5' );
+
+	{write Simple Expression -> Term TermTail}
+			{write SimpleExpression -> Term AddingOperator Term TermTail}
+			{write SimpleExpression -> Term '+' Term TermTail}
+			writeln (a + b, ': should be 15');
+
+			{write SimpleExpression -> Term '-' Term TermTail}
+			writeln (c-b, ': should be 10'); 
+	
+	{write SimpleExpression -> OptionalSign Term TermTail}
+		{write SimpleExpression -> '+' Term}
+		writeln (+88, ': should be 88');
+		
+		{write SimpleExpression -> '-' Term}
+		writeln (-66, ': should be -66');
+		
+		{write SimpleExpression -> '+'  Term '+' Term TermTail} 
+                writeln (+ a + b, ': should be 15');
+
+		{write SimpleExpression -> '-'  Term '+' Term TermTail}
+                writeln (-(a + b), ': should be -15');
+
+	{write Expression -> Simple Expression OptionalRelationalPart}
+		{write Epression -> SimpleExpression RelationalOperator SimpleExpression}
+		{write Epression -> SimpleExpression '=' SimpleExpression}
+		{write Epression -> SimpleExpression '<' SimpleExpression}
+		{write Epression -> SimpleExpression '>' SimpleExpression}
+		{write Epression -> SimpleExpression '<=' SimpleExpression}
+		{write Epression -> SimpleExpression '>=' SimpleExpression}
+		{write Epression -> SimpleExpression '<>' SimpleExpression}
+		
+
+{END WRITE STATEMENT}
+end.

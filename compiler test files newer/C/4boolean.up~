@@ -1,0 +1,27 @@
+program mathTest;
+var a, b, c, d, e, f: boolean;
+    x, y, z: integer;
+
+begin
+
+a := true;
+b := false;
+c := a and b;
+writeln('a and b = ', c);
+
+c := a or b;
+writeln('a or b = ', c);
+
+c := not b;
+writeln('not b = ', c);
+
+c := not a;
+writeln('a = ', a, ' and b = ', b, ' and not a = ', c);
+
+x := 1; y := 2; z := 3;
+c := (x < y) and (y < z);
+writeln('a = ', a, ' and x = ', x, ' and y = ', y,' and z = ', z, ' and b = ', c);
+end.
+
+
+

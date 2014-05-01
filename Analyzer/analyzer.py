@@ -2,6 +2,7 @@ import sys
 import datetime
 sys.path.insert(0, '../')
 from tokenTypes import types as tokenTypes
+from label import Label
 sys.path.insert(0, '../Parser/')
 import parser as parser
 from Parser.classifications import classification
@@ -16,8 +17,8 @@ class Analyzer:
     symbolTables = None
     
     def __init__(self, tables):
-        global symbolTables
-
+        global symbolTables, label
+        label = Label()
         if self.o.closed:
             print "ERROR: Output file not opened properly..."
         symbolTables = tables
@@ -96,7 +97,7 @@ class Analyzer:
         nestingLvl = str(table.getNestingLevel())
         memOffset = str(data['offset'])
         nestingLvl = 'D' + nestingLvl
-        return memOffset + '(' + nestingLvl + ')'
+        return str(memOffset + '(' + nestingLvl + ')')
     # --------------------------------------------------------------
     # VM Assembly Functions
     # --------------------------------------------------------------
@@ -262,11 +263,11 @@ class Analyzer:
     def genCMPNESF(self):
         self.o.write("CMPNESF" + '\n')
     
-    def genBRTS(self):
-        self.o.write("BRTS" + '\n')
+    def genBRTS(self, lbl):
+        self.o.write("BRTS " + str(lbl) + '\n')
     
-    def genBRFS(self):
-        self.o.write("BRFS" + '\n')
+    def genBRFS(self, lbl):
+        self.o.write("BRFS " + str(lbl) + '\n')
     
     def genBR(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
@@ -274,13 +275,13 @@ class Analyzer:
         else:
             self.semanticError("Called genBR with type other than LABEL")
     
-    def label(self, label):
-        self.o.write(label + ':' + '\n')
+    def label(self, lbl):
+        self.o.write(lbl + ':' + '\n')
     
     def genLabel(self):
-        label = parser.getNextLabel()
-        lblRec = {'type':recTypes.LABEL, 'label':label}
-        self.label(label)
+        lbl = label.getNextLabel()
+        lblRec = {'type':recTypes.LABEL, 'label':lbl}
+        self.label(lbl)
         return lblRec
     
     def genSpecLabel(self, nameRec):
@@ -356,8 +357,8 @@ class Analyzer:
     """
     def genProcCall(self, procRec):
         row = self.getSemRecIdRow(procRec)
-        label = row['branch']['label']
-        self.genCALL(label)
+        lbl = row['branch']['label']
+        self.genCALL(lbl)
         paramSize = len(row['attributes'])
         self.genSUB('SP', '#' + str(paramSize + 1), 'SP')
     
@@ -366,8 +367,8 @@ class Analyzer:
     """
     def genFuncCall(self, funcRec):
         row = self.getSemRecIdRow(funcRec)
-        label = row['branch']['label']
-        self.genCALL(label)
+        lbl = row['branch']['label']
+        self.genCALL(lbl)
         paramSize = len(row['attributes'])
         self.genSUB('SP', '#' + str(paramSize + 1), 'SP')
     
@@ -407,8 +408,8 @@ class Analyzer:
     def genBNEF(self):
         self.o.write("BNEF" + '\n')
     
-    def genCALL(self, label):
-        self.o.write("CALL " + str(label) + '\n')
+    def genCALL(self, lbl):
+        self.o.write("CALL " + str(lbl) + '\n')
     
     def genRET(self):
         self.o.write("RET" + '\n')
@@ -422,8 +423,8 @@ class Analyzer:
     def genSPslot(self):
         self.genADD('SP', '#1', 'SP')
     
-    def brUncond(self, label):
-        self.o.write('BR ' + str(label) + '\n')
+    def brUncond(self, lbl):
+        self.o.write('BR ' + str(lbl) + '\n')
     
     def genPushId(self, factor):
         factorClass = factor['classification']
@@ -482,16 +483,16 @@ class Analyzer:
                         self.genPUSH(offset)
             elif formalParamMode == mode.VARIABLE:
                 if actualParamMode == mode.VALUE:
-                    self.semanticError("Cannot send 'mode:value, actual parameter' " + factor['lexeme'] + " into 'mode: variable, formal param' procedure/function")
+                    self.semanticError("Cannot send 'mode: VALUE, actual parameter': " + factor['lexeme'] + " into 'mode: VARIABLE, formal param' procedure/function")
                 elif actualParamMode == mode.VARIABLE:
                     if formalParamType == actualParamType:
                         if varClass:
-                            register = 'D' + table['nestinglvl']
+                            register = 'D' + str(table.getNestingLevel())
                             offset = rowData['offset']
                             returnVal = factor
-                            self.genComment("push address class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + offset)
+                            self.genComment("push address class: " + rowData['classification'] + ", lexeme: " + rowData['lexeme'] + ", type: " + rowData['type'] + ", offset: " + str(offset))
                             self.genPUSH(register)
-                            self.genPUSH('#' + offset)
+                            self.genPUSH('#' + str(offset))
                             self.genADDS()
                         else:
                             returnVal = factor
@@ -500,8 +501,8 @@ class Analyzer:
                             self.genPUSH(offset)
                     else:
                         self.semanticError("mode variable actual param type: " + actualParamType + " must match the mode variable formal param type of: " + formalParamType)
-            else:
-                self.semanticError("actual parameter does not have a valid mode")
+        else:
+            self.semanticError("actual parameter does not have a valid mode")
         return returnVal
     
     def genCastDivision(self, left, right):
@@ -511,7 +512,7 @@ class Analyzer:
         castL = False
         castR = False
         if leftType == varTypes.FLOAT:
-            arrayRec[0] = left
+            arrayRec.append(left)
             castL = True
         elif leftType == varTypes.INTEGER:
             self.genComment("start cast left to float")
@@ -519,16 +520,16 @@ class Analyzer:
             self.genCASTSF()
             self.genADD('SP', '#1', 'SP') # move back
             self.genComment("end cast left to float")
-            arrayRec[0] = {'type':recTypes.LITERAL, 'varType':varTypes.FLOAT}
+            arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
             castL = True
         else:
             castL = False
         if rightType == varTypes.FLOAT:
-            arrayRec[1] = left
+            arrayRec.append(left)
             castR = True
         elif rightType == varTypes.INTEGER:
             self.genCASTSF()
-            arrayRec[1] = {'type':recTypes.LITERAL, 'varType':varTypes.FLOAT}
+            arrayRec.append({'type':recTypes.LITERAL, 'varType':varTypes.FLOAT})
             castR = True
         else:
             castR = False
@@ -623,7 +624,7 @@ class Analyzer:
             else:
                 self.semanticError(op + " is not an addOp for type: " + resultType)
         elif resultType == varTypes.BOOLEAN:
-            if op == tokenTypes.MP_MINUS:
+            if op == tokenTypes.MP_OR:
                 self.genORS()
             else:
                 self.semanticError(op + " is not an addOp for type: " + resultType)
@@ -634,7 +635,7 @@ class Analyzer:
     def genOptSimNeg(self, opSign, term):
         if opSign is not None and term is not None:
             termType = self.getSemRecType(term)
-            op = opSign['sign']
+            op = opSign['tokenType']
             if termType == varTypes.INTEGER:
                 if op == tokenTypes.MP_MINUS:
                     self.genNEGS()
@@ -806,9 +807,9 @@ class Analyzer:
             self.semanticError("The 'for' loop's control var must be of type Integer")
     
     def genBranchUncond(self):
-        label = parser.getNextLabel()
-        lblRec = {'type':recTypes.LABEL, 'label':label}
-        self.brUncond(label)
+        lbl = label.getNextLabel()
+        lblRec = {'type':recTypes.LABEL, 'label':lbl}
+        self.brUncond(lbl)
         return lblRec
     
     def genBranchUncondTo(self, nameRec):
@@ -819,26 +820,26 @@ class Analyzer:
     
     def genBranchTrueTo(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            self.branchTrue(nameRec['label'])
+            self.genBRTS(nameRec['label'])
         else:
             self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
     def genBranchFalseTo(self, nameRec):
         if nameRec['type'] == recTypes.LABEL:
-            self.branchFalse(nameRec['label'])
+            self.genBRFS(nameRec['label'])
         else:
             self.semanticError("Can't gen label with info of type: " + str(nameRec['type']))
     
     def genBranchTrue(self):
-        label = parser.getNextLabel()
-        lblRec = {'type':recTypes.LABEL, 'label':label}
-        self.branchTrue(label)
+        lbl = label.getNextLabel()
+        lblRec = {'type':recTypes.LABEL, 'label':lbl}
+        self.genBRTS(lbl)
         return lblRec
     
     def genBranchFalse(self):
-        label = parser.getNextLabel()
-        lblRec = {'type':recTypes.LABEL, 'label':label}
-        self.branchFalse(label)
+        lbl = label.getNextLabel()
+        lblRec = {'type':recTypes.LABEL, 'label':lbl}
+        self.genBRFS(lbl)
         return lblRec
     
     def genOptRelPart(self, left, op, right):
@@ -846,7 +847,7 @@ class Analyzer:
             results = self.genCast(left, right)
             resultType = self.getSemRecType(results[0])
             relOp = op['token']
-            if resultType == tokenTypes.MP_INTEGER:
+            if resultType == varTypes.INTEGER:
                 if relOp == tokenTypes.MP_NEQUAL:
                     self.genCMPNES()
                 elif relOp == tokenTypes.MP_GEQUAL:
@@ -858,10 +859,10 @@ class Analyzer:
                 elif relOp == tokenTypes.MP_LTHAN:
                     self.genCMPLTS()
                 elif relOp == tokenTypes.MP_EQUAL:
-                    self.genCMPGES()
+                    self.genCMPEQS()
                 else:
                     self.semanticError(relOp + " isn't an operator for " + resultType)
-            elif resultType == tokenTypes.MP_FLOAT:
+            elif resultType == varTypes.FLOAT:
                 if relOp == tokenTypes.MP_NEQUAL:
                     self.genCMPNESF()
                 elif relOp == tokenTypes.MP_GEQUAL:
@@ -873,7 +874,7 @@ class Analyzer:
                 elif relOp == tokenTypes.MP_LTHAN:
                     self.genCMPLTSF()
                 elif relOp == tokenTypes.MP_EQUAL:
-                    self.genCMPGESF()
+                    self.genCMPEQSF()
                 else:
                     self.semanticError(relOp + " isn't an operator for " + resultType)
             else:
